@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 import net.miginfocom.swing.*;
-import swingProject.service.LezTools;
+import swingProject.service.MainFrame;
 
 public class Login {
 
@@ -141,15 +141,21 @@ public class Login {
 
                 /*Main frame = new Main();
                 frame.setVisible(true);*/
-                LezTools lezTools = new LezTools();
-                lezTools.setVisible(true);
+                /*LezTools lezTools = new LezTools();
+                lezTools.setVisible(true);*/
+
             }
         } else {
             //JOptionPane.showMessageDialog(null, "Faild");
 
             Login.dispose();
-            LezTools lezTools = new LezTools();
-            lezTools.setVisible(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    MainFrame mainframe = new MainFrame();
+                    mainframe.setVisible(true);
+                }
+            });
         }
     }
 

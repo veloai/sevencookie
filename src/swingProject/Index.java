@@ -1,5 +1,6 @@
 package swingProject;
 
+import swingProject.front.DualLogin;
 import swingProject.front.Login;
 
 public class Index {
@@ -8,6 +9,7 @@ public class Index {
      * Launch the application.
      */
     public static void main(String[] args) {
-        new Login();
+//        new Login();
+        new DualLogin();
     }
 }
