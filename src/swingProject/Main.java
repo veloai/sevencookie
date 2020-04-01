@@ -5,7 +5,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
@@ -16,12 +21,14 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 import com.util.Const;
+import com.util.Utility;
 import com.util.props.Props;
 import com.util.props.PropsException;
 import swingProject.front.Login;
@@ -38,10 +45,13 @@ import javax.swing.JButton;
 import javax.swing.JRadioButton;
 import java.awt.SystemColor;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTree;
 import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
+import static javax.swing.JOptionPane.showMessageDialog;
+import javax.swing.JScrollBar;
 
 public class Main extends JFrame implements ActionListener, ItemListener {
 
@@ -57,15 +67,26 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 	JRadioButton rdbtnLezKeepAlive, rdbtnLezSimpleSender, rdbtnLezReceiver, rdbtnLezShooter, rdbtnLezCameraControl;
 	JRadioButton radio[] = new JRadioButton[5];
 	private JToggleButton tglbtnLezKeepAlive, tglbtnLezSimpleSender, tglbtnLezReceiver, tglbtnLezShooter, tglbtnLezCameraControl;
-
+	JTextArea textArea;
+	
 	Props props;
+	static String rootPath;
+	private JScrollPane scrollPane_1;
+	Timer timer;
+	JRadioButton selectedRadioButton;
+	String[] logList = {"kpAlvSim","b","c","d","e"};
 	/**
 	 * Launch the application.
 	 */
+	{
+		rootPath = System.getProperty("user.dir");
+	}
+	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				new Login();
+				//new Main();
 			}
 		});
 	}
@@ -167,7 +188,12 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 		lblStatus.setBounds(252, 7, 58, 15);
 		listPanel.add(lblStatus);
 
-		tglbtnLezKeepAlive = new JToggleButton(Const.STOP);
+		if(Utility.checkPid("AGNG_KEEPALIVE_SIMULATOR-pid")) {
+			tglbtnLezKeepAlive = new JToggleButton(Const.STOP);
+			tglbtnLezKeepAlive.setSelected(true);
+		}else {
+			tglbtnLezKeepAlive = new JToggleButton(Const.START);
+		}
 		tglbtnLezKeepAlive.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				startStopAction(e, tglbtnLezKeepAlive, Const.lezKeepAlive);
@@ -177,7 +203,7 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 		tglbtnLezKeepAlive.setBounds(216, 29, 135, 23);
 		listPanel.add(tglbtnLezKeepAlive);
 
-		tglbtnLezSimpleSender = new JToggleButton(Const.STOP);
+		tglbtnLezSimpleSender = new JToggleButton(Const.START);
 		tglbtnLezSimpleSender.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				startStopAction(e, tglbtnLezSimpleSender, Const.lezSimpleSender);
@@ -186,7 +212,7 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 		tglbtnLezSimpleSender.setBounds(216, 71, 135, 23);
 		listPanel.add(tglbtnLezSimpleSender);
 
-		tglbtnLezReceiver = new JToggleButton(Const.STOP);
+		tglbtnLezReceiver = new JToggleButton(Const.START);
 		tglbtnLezReceiver.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				startStopAction(e, tglbtnLezReceiver, Const.lezReceiver);
@@ -195,7 +221,7 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 		tglbtnLezReceiver.setBounds(216, 116, 135, 23);
 		listPanel.add(tglbtnLezReceiver);
 
-		tglbtnLezShooter = new JToggleButton(Const.STOP);
+		tglbtnLezShooter = new JToggleButton(Const.START);
 		tglbtnLezShooter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				startStopAction(e, tglbtnLezShooter, Const.lezShooter);
@@ -204,7 +230,7 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 		tglbtnLezShooter.setBounds(216, 162, 135, 23);
 		listPanel.add(tglbtnLezShooter);
 
-		tglbtnLezCameraControl = new JToggleButton(Const.STOP);
+		tglbtnLezCameraControl = new JToggleButton(Const.START);
 		tglbtnLezCameraControl.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				startStopAction(e, tglbtnLezCameraControl, Const.lezCameraControl);
@@ -225,10 +251,18 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 
 		JLayeredPane logPanel = new JLayeredPane();
 		tabbedPane.addTab("log", null, logPanel, null);
+		
+		textArea = new JTextArea();
+		textArea.setBounds(0, 0, 490, 513);
+		
+		scrollPane_1 = new JScrollPane(textArea);
+		scrollPane_1.setBounds(0, 0, 506, 515);
 
-		JTextArea textArea = new JTextArea();
-		textArea.setBounds(0, 0, 506, 513);
-		logPanel.add(textArea);
+		logPanel.add(scrollPane_1);
+		
+		
+		
+		
 
 		configPane = new JPanel();
 		configPane.setBackground(SystemColor.control);
@@ -240,13 +274,19 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 			new Object[][] {
 				{"path", "/data/mecar"},
 				{"file.transuni", "/data/meca/dse"},
-				{"delay", 100},
-				{null, null},
+				{"delay", new Integer(100)}
 			},
 			new String[] {
 				"\uC18D\uC131 \uC774\uB984", "\uAC12"
 			}
-		));
+		) {
+			boolean[] columnEditables = new boolean[] {
+				false, true
+			};
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
+		});
 		table.getColumnModel().getColumn(0).setPreferredWidth(130);
 		table.getColumnModel().getColumn(1).setPreferredWidth(125);
 		table.setBorder(new LineBorder(new Color(0, 0, 0)));
@@ -256,10 +296,37 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 		scrollPane.setSize(473, 242);
 		configPane.add(scrollPane);
 
-		JButton btnConfig = new JButton("저 장");
-		btnConfig.setBounds(370, 256, 97, 23);
-		configPane.add(btnConfig);
+		JButton btnSave = new JButton("저 장");
+		btnSave.setBounds(370, 256, 97, 23);
+		btnSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(selectedRadioButton == null) {
+					showMessageDialog(null, "라디오 버튼을 선택해주세요.");
+				} else {
+					//System.out.println(selectedRadioButton.getText());
+					StringBuilder sb = new StringBuilder();
+					
+					for (int i = 0; i < table.getRowCount(); i++) {
+						System.out.println(table.getValueAt(i, 0).toString()+"="+table.getValueAt(i, 1).toString());
+						sb.append(table.getValueAt(i, 0).toString()+"="+table.getValueAt(i, 1).toString()+"\n");
+					}
+					
+					File file = new File("/tmp/"+selectedRadioButton.getText()+".properties");
+					FileWriter writer = null;
+					
+					try {
+						writer = new FileWriter(file, false);
+						writer.write(sb.toString());
+						writer.flush();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
 
+				}
+			}
+		});
+		configPane.add(btnSave);
+	
 	}
 
 	@Override
@@ -275,7 +342,7 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 			if(e.getSource() == radio[i]) {
 				DefaultTableModel m = (DefaultTableModel)table.getModel();
 				m.setNumRows(0); // 초기화
-
+				selectedRadioButton = radio[i];
 				//데이터 properties 입력
 				props = getProps(radio[i].getText());
 				if(props != null) {
@@ -288,52 +355,76 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 				break;
 			}
 		}
+
+
 	}
 
 	//시작 or 정지
 	private void startStopAction(ActionEvent e, JToggleButton tglBtn, int num) {
-
-		boolean isStarted = false;
-		if(e.getActionCommand().equals(Const.STOP)) {
-			tglBtn.setText(Const.START);
-			isStarted = true;
-		}else {
-			tglBtn.setText(Const.STOP);
-			isStarted = false;
-		}
+		
+		Utility.checkAndMakePath("/tmp");
+		String rootPath= System.getProperty("user.dir");
+		//boolean isStarted = false;
+		
 
 		try {
 
 			Runtime rt = Runtime.getRuntime();
 			if(num == Const.lezKeepAlive) {
-
-				if(isStarted) {
-					//Process p = rt.exec("./kpAlvSim.sh start "+getPropPath()+"lezKeepAlive.properties");
-					System.out.println("진짜 실행됨?");
-				}else {
-					rt.exec("./kpAlvSim.sh stop");
-					System.out.println("멈춤");
+				if(rdbtnLezKeepAlive.isSelected()) {
+					StringBuilder sb = new StringBuilder();
+					
+					if(tglbtnLezKeepAlive.isSelected()) {
+						System.out.println(Utility.cmdExecString(rootPath+"\\kpAlvSim.sh start "+"/tmp/lezKeepAlive.properties"));
+						Process p = rt.exec(Utility.cmdExecString(rootPath+"\\kpAlvSim.sh start"));
+						//System.out.println("진짜 실행됨?");
+						
+						FileReader in = new FileReader(rootPath + "/kpAlvSim.log");
+	            		BufferedReader b_in = new BufferedReader(in);
+	            		
+				        textArea.setText("");
+						ReadFile(b_in);
+						timer.start(); 
+					} else {
+						rt.exec(Utility.cmdExecString(rootPath+"\\kpAlvSim.sh stop"));
+						//System.out.println("멈춤");
+					}
+					
+					if(e.getActionCommand().equals(Const.STOP)) {
+						tglBtn.setText(Const.START);
+					}else {
+						tglBtn.setText(Const.STOP);
+					}
+					
+				} else {
+					showMessageDialog(null, "라디오 버튼을 선택해주세요.");
+					tglbtnLezKeepAlive.setSelected(!tglbtnLezKeepAlive.isSelected());
 				}
 
 			} else if (num == Const.lezSimpleSender) {
-
+				textArea.setText("");
 			} else if (num == Const.lezReceiver) {
-
+				textArea.setText("");
 			} else if (num == Const.lezShooter) {
-
+				textArea.setText("");
 			} else if (num == Const.lezCameraControl) {
-
+				textArea.setText("");
 			}
 
-		} catch (IOException e1) {
+		}
+		catch (IOException e1) {
 			e1.printStackTrace();
+		}
+		finally {
+			
 		}
 
 	}
 
 	private Props getProps(String name) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getPropPath()).append(File.separator).append(name).append(".properties");
+		sb.append("/tmp").append(File.separator).append(name).append(".properties");
+		System.out.println("props : "+sb.toString());
 		try {
 			//JOptionPane.showMessageDialog(listPanel, getPropPath(name));
 			//return new Props(getPropPath(name));
@@ -359,7 +450,7 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 
 	private String getPropPath() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(System.getProperty("user.dir")).append(Paths.get(File.separator,"src","com","properties").toString());
+		//sb.append(System.getProperty("user.dir")).append(Paths.get(File.separator,"src","com","properties").toString());
 		//sb.append(Paths.get("/","com","credif","properties").toString());
 
 //		  Path file = null; try { file = Files.createTempFile(null, ".properties"); try
@@ -375,7 +466,35 @@ public class Main extends JFrame implements ActionListener, ItemListener {
 //		}
 		return sb.toString();
 	}
+	
+	public void ReadFile(BufferedReader b_in) {
+        
+        timer = new Timer(10, new ActionListener() {
 
+            public void actionPerformed(ActionEvent e) {
+                try {
+                	String line;
+					
+					if ((line = b_in.readLine()) != null) { 
+						textArea.append(line + "\n"); 
+					} else {
+						//((Timer) e.getSource()).stop();
+						/*
+						 * if(line != null) { textArea.append(line + "\n");
+						 * 
+						 * }
+						 */
+					}
+					textArea.setCaretPosition(textArea.getDocument().getLength());
+                	
+                } catch (IOException ex) {
+                    //Logger.getLogger(ReadFile.class.getName()).log(Level.SEVERE, null, ex);
+                	ex.printStackTrace();
+                }
+            }
+        });
 
+       
+    }
 }
 	

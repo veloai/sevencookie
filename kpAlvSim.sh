@@ -1,7 +1,16 @@
 #! /bin/sh
 SERVICE_NAME=AGNG_KEEPALIVE_SIMULATOR
-PATH_TO_JAR=./agngVhcl-kpAlvSim-2.0.1.jar
-PID_PATH_NAME=/tmp/AGNG_KEEPALIVE_SIMULATOR-pid
+PATH_TO_JAR=./agngVhcl-kpAlvSim-2.0.2.jar
+
+CHECK_OS="`uname -s`"
+case "$CHECK_OS" in     
+Darwin*)   PID_PATH_NAME=tmp/AGNG_KEEPALIVE_SIMULATOR-pid;;
+Linux*)   PID_PATH_NAME=tmp/AGNG_KEEPALIVE_SIMULATOR-pid ;;
+MINGW32*) PID_PATH_NAME=c:/tmp/AGNG_KEEPALIVE_SIMULATOR-pid;;
+MINGW64*) PID_PATH_NAME=c:/tmp/AGNG_KEEPALIVE_SIMULATOR-pid;; 
+CYGWIN*) PID_PATH_NAME=c:/tmp/AGNG_KEEPALIVE_SIMULATOR-pid;; 
+esac
+
 case "$1" in
     start)
         echo "Starting $SERVICE_NAME ..."
