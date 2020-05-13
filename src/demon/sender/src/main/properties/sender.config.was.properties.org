@@ -1,0 +1,12 @@
+receive.port = 21010
+#receive.addr = 196.100.101.1
+receive.addr = 127.0.0.1
+timeout = 3000
+dirs = file.wtchng|file.wtchngEmrgncy|file.realTimeWtchng|file.laneTrffc|file.laneTrffcWkly|file.cmrSts
+file.wtchng = /mecar/snd/08
+file.wtchngEmrgncy = /mecar/snd/16
+file.realTimeWtchng = /mecar/snd/12
+file.laneTrffc = /mecar/snd/13
+file.laneTrffcWkly = /mecar/snd/14
+file.cmrSts = /mecar/snd/09
+file.eof.ext = eof
