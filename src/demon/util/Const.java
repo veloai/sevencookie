@@ -1,4 +1,4 @@
-package util;
+package demon.util;
 
 public class Const {
 	

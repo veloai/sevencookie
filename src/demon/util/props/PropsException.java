@@ -1,5 +1,5 @@
 
-package util.props;
+package demon.util.props;
 
 public class PropsException extends Exception {
     public PropsException(String msg) {
