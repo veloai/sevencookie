@@ -3,6 +3,8 @@ package swing;
 import java.awt.*;
 import java.awt.event.*;
 
+import static javafx.application.Application.launch;
+
 public class SplashDemo extends Frame implements ActionListener {
     static void renderSplashFrame(Graphics2D g, int frame) {
         final String[] comps = {"foo", "bar", "baz"};
@@ -13,8 +15,8 @@ public class SplashDemo extends Frame implements ActionListener {
         g.drawString("Loading "+comps[(frame/5)%3]+"...", 120, 150);
     }
     public SplashDemo() {
-        super("SplashScreen demo");
-        setSize(300, 200);
+        super("SplashScreen");
+        /*setSize(300, 200);
         setLayout(new BorderLayout());
         Menu m1 = new Menu("File");
         MenuItem mi1 = new MenuItem("Exit");
@@ -24,7 +26,7 @@ public class SplashDemo extends Frame implements ActionListener {
 
         MenuBar mb = new MenuBar();
         setMenuBar(mb);
-        mb.add(m1);
+        mb.add(m1);*/
         final SplashScreen splash = SplashScreen.getSplashScreen();
         if (splash == null) {
             System.out.println("SplashScreen.getSplashScreen() returned null");
@@ -45,7 +47,7 @@ public class SplashDemo extends Frame implements ActionListener {
             }
         }
         splash.close();
-        setVisible(true);
+        //setVisible(true);
         toFront();
     }
     public void actionPerformed(ActionEvent ae) {
