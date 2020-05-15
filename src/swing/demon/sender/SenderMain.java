@@ -1,7 +1,7 @@
-package com.ftrnsfr.sender;
+package swing.demon.sender;
 
-import com.ftrnsfr.props.Props;
-import com.ftrnsfr.props.PropsException;
+import swing.demon.util.props.Props;
+import swing.demon.util.props.PropsException;
 
 import java.io.*;
 import java.net.InetSocketAddress;
