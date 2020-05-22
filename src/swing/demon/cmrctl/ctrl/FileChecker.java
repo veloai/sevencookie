@@ -36,10 +36,11 @@ public class FileChecker {
     /**
      * Creates a WatchService and registers the given directory
      */
-    FileChecker(String cname ) throws IOException {
+    public FileChecker(String cname) throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<WatchKey, Path>();
         this.cname = cname;
+        System.out.println(props.getString("watching.dir"));
         Path dir = Paths.get(props.getString("watching.dir"));
         System.out.println("Waching directory:[" + dir + "]");
         dvcIps = props.getString("dvc.ip").trim().split(",");
@@ -80,6 +81,7 @@ public class FileChecker {
                 WatchKey key;
                 try {
                     key = watcher.take();
+                    System.out.println(key);
                 } catch (InterruptedException x) {
                     return;
                 }

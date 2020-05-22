@@ -49,11 +49,8 @@ public class MaterialLoginController implements Initializable {
     Stage primaryStage = null;
     @FXML
     private void ButtonAction(ActionEvent event) throws IOException {
-        //System.out.println("You clicked me!");
-        //label.setText("Hello World!");
         if(userId.getText().equals("user") && userPw.getText().equals("pass")){
             label.setText("Login Success");
-
         }else{
             label.setText("Login Failed");
             login();
@@ -63,7 +60,7 @@ public class MaterialLoginController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-        System.out.println("Initialize FXML");
+        //System.out.println("Initialize FXML");
     }
 
     public void login() throws IOException {

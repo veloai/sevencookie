@@ -26,18 +26,6 @@ public class MainController implements Initializable {
 
     @FXML private Button btnAdd;
 
-    @FXML private Button btnDelete;
-
-    @FXML private ListView<String> listBoxMain;
-
-    @FXML private TextField txtAddItem;
-
-    @FXML private ToggleGroup modGroup;
-
-    @FXML private Button btnSave;
-
-    @FXML private TextArea txtProp;
-
     private ObservableList<String> listItems;
     private Stage stage;
 
@@ -178,5 +166,17 @@ public class MainController implements Initializable {
             }
         }
 
+    }
+
+    public void startDemon(ActionEvent event) throws IOException {
+        String item = listBoxMain.getSelectionModel().getSelectedItem();
+        if (item!=null){
+            String str = propPath+listBoxMain.getSelectionModel().getSelectedItem();
+            //sndfile.run(str);
+            CmrctlMain cc = new CmrctlMain();
+            cc.cmrctl(str);
+        }else{
+            console.setText("정보가 없습니다.");
+        }
     }
 }

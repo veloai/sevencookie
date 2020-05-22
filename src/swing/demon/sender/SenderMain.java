@@ -8,12 +8,10 @@ import swing.demon.util.props.PropsException;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SenderMain {
     static Props props;
-    final static SimpleDateFormat dFrmt = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
     private static GenericExtFilter filter = new GenericExtFilter(".eof");
     static boolean isLogShow = false;
     //static boolean isExceptionShow = false;
@@ -32,15 +30,12 @@ public class SenderMain {
             }
             System.exit(-1);
         }
-
-
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
 
             @Override
             public void run() {
-                send(cname);
-//				sayHello();
+                send(propPath);
             }
         };
         //- 초단위 변경
@@ -49,7 +44,6 @@ public class SenderMain {
         //System.out.println("Scheduling " + props.getInt("schedule.interval") + " second.");
 
         timer.schedule(timerTask, 5000, interval);
-    }
 
     /*static void sayHello() {
         System.out.println("hello" + new Date());
@@ -59,20 +53,6 @@ public class SenderMain {
             e.printStackTrace();
         }
     }*/
-
-    public static String getNow() {
-        return dFrmt.format(new Date());
-    }
-
-    static boolean existEof(String fileName) {
-
-        String[] list = new File(fileName).list(filter);
-
-        new File(fileName).deleteOnExit();
-//        System.out.println("eof file deleted!");
-        return list.length > 0? true : false;
-    }
-
 
     static void send(String cname) {
         if(isLogShow) {
@@ -136,21 +116,6 @@ public class SenderMain {
             }
         }
 
-    }
-
-
-    private static List<File> getFileList(File dir) {
-        File[] aFiles = dir.listFiles();
-        List<File> lFiles = aFiles != null ? Arrays.asList(aFiles) : null;
-        List<File> ret = null;
-
-        if (lFiles != null) {
-            ret = new ArrayList<File>();
-
-            ret.addAll(lFiles);
-        }
-
-        return ret;
     }
 
     static void sendFile(String key, OutputStream os, InputStream is, Props props) throws IOException {
