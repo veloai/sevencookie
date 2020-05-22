@@ -8,17 +8,21 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import swing.tray.TrayMenu;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 public class MainController implements Initializable {
-
-    //@FXML TextArea txtArea;
 
     @FXML private Button btnAdd;
 
@@ -42,12 +46,12 @@ public class MainController implements Initializable {
 
     StringBuilder sb;
     String propPath;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //listView 초기 부분
         listItems = FXCollections.observableArrayList();
         listBoxMain.setItems(listItems);
-
         modGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
             @Override
             public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
@@ -68,21 +72,13 @@ public class MainController implements Initializable {
                             listItems.add(fileList[i].getName());
                         }
                     }
+                    txtProp.clear();
 
                 }
 
             }
         });
 
-    }
-
-    public void textAreaResize() {
-        /*txtArea.prefHeightProperty().bind(Bindings.createDoubleBinding(new Callable<Double>(){
-            @Override
-            public Double call() throws Exception {
-                return txtArea.getBoundsInLocal().getHeight();
-            }
-        }, txtArea.boundsInLocalProperty()).add(10));*/
     }
 
     @FXML
@@ -117,31 +113,40 @@ public class MainController implements Initializable {
     @FXML
     private void deleteAction(ActionEvent action) {
         int selectedItem = listBoxMain.getSelectionModel().getSelectedIndex();
-        if(selectedItem > -1){
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        if(listBoxMain.getItems().size() > 1) {
+            if(selectedItem > -1){
 
-            File file = new File(propPath+File.separator+listBoxMain.getSelectionModel().getSelectedItem().toString());
+                File file = new File(propPath+File.separator+listBoxMain.getSelectionModel().getSelectedItem().toString());
 
-            if(file.exists()) {
-                if(file.delete()) {
-                    System.out.println("파일 삭제 성공");
+                if(file.exists()) {
+                    if(file.delete()) {
+                        System.out.println("파일 삭제 성공");
+                    }
+                } else {
+                    System.out.println("파일이 존재 하지 않습니다.");
                 }
-            } else {
-                System.out.println("파일이 존재 하지 않습니다.");
+
+                listItems.remove(selectedItem);
+
             }
 
-            listItems.remove(selectedItem);
-
+        } else {
+            alert.setContentText("1개 이하로 삭제 할수 없습니다.");
+            alert.showAndWait();
         }
     }
 
     @FXML
     private void saveAction(ActionEvent action) {
-        System.out.println("저장 ㅋ");
+        //System.out.println("저장 ㅋ");
         try{
-            FileWriter writer = null;
-            writer = new FileWriter(propPath+File.separator+listBoxMain.getSelectionModel().getSelectedItem().toString());
-            writer.write(txtProp.getText().replaceAll("\n", "\r\n"));
-            writer.close();
+            if(propPath != null && listBoxMain.getSelectionModel().getSelectedItem() != null) {
+                FileWriter writer = null;
+                writer = new FileWriter(propPath + File.separator + listBoxMain.getSelectionModel().getSelectedItem().toString());
+                writer.write(txtProp.getText().replaceAll("\n", "\r\n"));
+                writer.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -151,24 +156,26 @@ public class MainController implements Initializable {
     @FXML
     public void listViewClick(MouseEvent arg0) {
         //System.out.println("clicked on " + listBoxMain.getSelectionModel().getSelectedItem());
-        BufferedReader reader = null;
-        //3번째 textarea에다가 txt내용 표시
-        txtProp.clear();
-        File file = new File(propPath+File.separator+listBoxMain.getSelectionModel().getSelectedItem().toString());
+        if(propPath != null && listBoxMain.getSelectionModel().getSelectedItem() != null) {
+            BufferedReader reader = null;
+            //3번째 textarea에다가 txt내용 표시
+            txtProp.clear();
+            File file = new File(propPath+File.separator+listBoxMain.getSelectionModel().getSelectedItem().toString());
 
-        try {
-            reader = new BufferedReader(new FileReader(file));
+            try {
+                reader = new BufferedReader(new FileReader(file));
 
-            String line = "";
-            while((line = reader.readLine()) != null){
-                txtProp.appendText(line+"\r\n");
+                String line = "";
+                while((line = reader.readLine()) != null){
+                    txtProp.appendText(line+"\r\n");
+                }
+                reader.close();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            reader.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
     }

@@ -1,6 +1,7 @@
 package swing.demon.receiver;
 
 
+import swing.demon.util.ExceptionConvert;
 import swing.demon.util.props.Props;
 
 import java.io.*;
@@ -10,10 +11,12 @@ public class Receiver implements Runnable {
 
     Socket socket;
     Props props;
+    boolean isLogShow = false;
 
-    public Receiver(Socket socket, Props props) {
+    public Receiver(Socket socket, Props props, boolean isLogShow) {
         this.socket = socket;
         this.props = props;
+        this.isLogShow = isLogShow;
     }
 
     public void run() {
@@ -22,34 +25,43 @@ public class Receiver implements Runnable {
         InputStream is = null;
         try {
             os = socket.getOutputStream();
-
             is = socket.getInputStream();
             String key = getKey(is);
             String keyVal = props.getString(key);
 
 //            System.out.println("- CLIENT : " + socket.getInetAddress());
-            System.out.println("- KEY : " + key);
-            System.out.println("- KEY-VALUE : " + keyVal);
-
-            if (keyVal == null) {
-                System.out.println("Raised error!!! You should make directory![" + key + "] key");
+            if(isLogShow) {
+                System.out.println("- KEY : " + key + " - KEY-VALUE : " + keyVal);
             }
 
-            sendReady(os);
-            receiveFile(key, keyVal, is, os);
+            if (keyVal == null) {
+                if(isLogShow) {
+                    System.out.println("Raised error!!! You should make directory![" + key + "] key");
+                }
+            } else {
+                sendReady(os);
+
+                receiveFile(key, keyVal, is, os);
+            }
 
             is.close();
             os.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            if(isLogShow) {
+                System.out.println(ExceptionConvert.getMessage(e));
+            }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            if(isLogShow) {
+                System.out.println(ExceptionConvert.getMessage(e));
+            }
         } finally {
             try {
                 socket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                if(isLogShow) {
+                    System.out.println(ExceptionConvert.getMessage(e));
+                }
             }
         }
     }
@@ -58,66 +70,79 @@ public class Receiver implements Runnable {
         String 	fname = null;
         long	fsize = -1;
         int		rbytes = -1;
-
+        int     flen = 0;
+        int BUFFER_SIZE = props.getInt("rcv.buffersize");
+        FileOutputStream fos;
+        byte[] buffer;
+        BufferedInputStream bis;
+        BufferedOutputStream bos;
         while (true) {
 
-            try {
-                byte[] buffer = new byte[props.getInt("rcv.buffersize")];
+            buffer = new byte[BUFFER_SIZE];
 
-                is.read(buffer, 0, buffer.length);
-                String temp = (new String(buffer)).trim();
+            is.read(buffer, 0, buffer.length);
+            String temp = (new String(buffer)).trim();
 
-//				System.out.println(temp);
+            if (!temp.equals("ENDOFTRANSFER")) {
+                long start = System.currentTimeMillis();
+                fname = temp.split("\\|")[0];
+                fsize = Long.parseLong(temp.split("\\|")[1]);
+                flen = (int) fsize;
 
-                if (!temp.equals("ENDOFTRANSFER")) {
-//                    System.out.println(temp);
-
-                    try {
-                        fname = temp.split("\\|")[0];
-                        fsize = Long.parseLong(temp.split("\\|")[1]);
-
-//                        System.out.println("- File Name : " + fname);
-//                        System.out.println("- File Size : " + fsize + "bytes");
-                    } catch (Exception e) {
-//                        System.out.println("checking error fileName, size[" + temp + "]");
-                        throw new Exception("checking error fileName, size[" + temp + "]");
-                    } finally {
-
-                    }
-
-                    sendReady(os);
-
-                    File dir = new File(path);
-                    if (!dir.exists()) {
-                        dir.mkdirs();
-                    }
-
-                    long acc = 0;
-                    FileOutputStream fos = new FileOutputStream(path + File.separator + fname, false);
-
-                    while (acc < fsize) {
-                        rbytes = is.read(buffer);
-                        acc += rbytes;
-
-                        if (rbytes != -1) {
-//                            System.out.println("- Receive : " + acc + "bytes");
-                            fos.write(buffer, 0, rbytes);
-                        }
-                    }
-
-                    fos.close();
-                    System.out.println("-[" + MultiReceiverMain.getNow() + "] File Received : " + path + File.separator + fname + " successfully!") ;
-
-                    sendReady(os);
-
-//                    System.out.println("after send READY...........");
-                } else {
-//                    System.out.println("received file successfully!");
-                    break;
+                if(isLogShow) {
+                    System.out.format("- File Name : %s  - File Size : %d bytes\n", fname, fsize);
                 }
-            } catch (Exception e) {
-//                System.out.println("unexpected Exception!!!" + e.getMessage());
-                throw new Exception("unexpected Exception!!!" + e.getMessage());
+
+                sendReady(os);
+
+                File dir = new File(path);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+
+                if(fname.toLowerCase().indexOf(".eof")> -1) {
+                    sendReady(os);
+                    continue;
+                }
+
+                long acc = 0;
+                //fos = new FileOutputStream(path + File.separator + fname, false);
+                StringBuilder sb = new StringBuilder();
+                sb.append(path).append(File.separator).append(fname);
+                bis = new BufferedInputStream(is);
+                bos = new BufferedOutputStream(new FileOutputStream(sb.toString(), false));
+
+                buffer = new byte[BUFFER_SIZE*2];
+                /*while (acc < fsize) {
+                    if ((rbytes = is.read(buffer)) != -1) {
+//                            System.out.println("- Receive : " + acc + "bytes");
+                        fos.write(buffer, 0, rbytes);
+                        acc += rbytes;
+                    }
+                }*/
+                long s1 = System.currentTimeMillis();
+                while (acc < fsize) {
+                    if ((rbytes = bis.read(buffer)) > 0) {
+                        bos.write(buffer, 0, rbytes);
+                        acc += rbytes;
+                        long e1 = System.currentTimeMillis();
+                        System.out.println("mid1 : "+(e1-s1) + " ms");
+                    }
+                }
+                bos.flush();
+                if(isLogShow) {
+                    System.out.println("-[" + MultiReceiverMain.getNow() + "] File Received : " + path + File.separator + fname + " successfully!") ;
+                }
+
+                sendReady(os);
+                bos.close();
+                //fos.close();
+                long end = System.currentTimeMillis();
+                System.out.println(end-start + " ms");
+//                    System.out.println("after send READY...........");
+            } else {
+//                    System.out.println("received file successfully!");
+                break;
             }
         }
 

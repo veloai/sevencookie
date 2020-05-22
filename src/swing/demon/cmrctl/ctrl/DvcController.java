@@ -1,5 +1,8 @@
 package swing.demon.cmrctl.ctrl;
 
+import swing.demon.cmrctl.vo.CtrlInfoVO;
+import swing.demon.cmrctl.vo.DvcOp;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;

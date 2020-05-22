@@ -37,6 +37,9 @@ public class Props {
 
         while((line = br.readLine()) != null) {
             if (!line.isEmpty()) {
+                if(line.substring(0, 1).equals("#")) {
+                    continue;
+                }
                 String[] temp = line.split("=");
                 propList.add(new Object[] {temp[0].trim(), temp[1].trim()});
                 this.props.put(temp[0].trim(), temp[1].trim());
@@ -60,5 +63,11 @@ public class Props {
     public String getString(String key) {
         return (String)this.props.get(key);
     }
-    
+
+    public boolean getBoolean(String key) {
+        if(this.props.get(key) == null) {
+            return false;
+        }
+        return Boolean.valueOf((String)this.props.get(key));
+    }
 }

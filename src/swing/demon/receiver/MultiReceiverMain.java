@@ -21,6 +21,7 @@ package swing.demon.receiver;
 
 
 
+import swing.demon.util.ExceptionConvert;
 import swing.demon.util.props.Props;
 import swing.demon.util.props.PropsException;
 
@@ -41,55 +42,68 @@ public class MultiReceiverMain {
 	private static ExecutorService threadPool;
 	static Props props;
 	final static SimpleDateFormat dFrmt = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-
+	static boolean isLogShow = false;
 	/**
 	 * main class
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println("##########   START FTrnsfr Multi Receiver  ##########");
 		ServerSocket 		server = null;
+		StringBuilder sb = new StringBuilder();
 		try {
-			String				cname	= args.length <= 0 || args[0] == null ? "./receiver.config.properties" : args[0];
+			sb.append(System.getProperty("user.dir")).append(File.separator).append("src").append(File.separator).append("swing").append(File.separator).append("demon").append(File.separator).append("receiver").append(File.separator).append("properties").append(File.separator).append("receiver.config.web.properties");
+			String				cname	= args.length <= 0 || args[0] == null ? sb.toString() : args[0];
+
 			props 	= new Props(cname);
 			int			 		port 	= props.getInt("receive.port");
-				THREAD_CNT = props.getInt("thread.pool.cnt");
-				threadPool = Executors.newFixedThreadPool(THREAD_CNT);
+			THREAD_CNT = props.getInt("thread.pool.cnt");
+			threadPool = Executors.newFixedThreadPool(THREAD_CNT);
+			isLogShow = props.getBoolean("is.log.show");
 
-			System.out.println(threadPool);
+			//System.out.println(threadPool);
 			server 	= new ServerSocket();
 			InetSocketAddress	inet 	= new InetSocketAddress(port);
-			
+
 			server.bind(inet);
-			System.out.println("- PORT : " + port);
+			if(isLogShow) {
+				System.out.println("##########   START FTrnsfr Multi Receiver  ##########");
+				System.out.println("- PORT : " + port);
+			}
 
 			while (true) {
-
+				Socket client = null;
 				try {
-					Socket client = server.accept();
+					client = server.accept();
 //					Receiver receiver = new Receiver(client, props);
 //					receiver.start();
-					System.out.println(threadPool);
 
-					threadPool.execute(new Receiver(client, props));
+					threadPool.execute(new Receiver(client, props, isLogShow));
 
 				} catch (Exception e) {
-					System.out.println(e.getMessage());
+					if(isLogShow) {
+						System.out.println(ExceptionConvert.getMessage(e));
+					}
 				}
 			}
 		} catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+			if(isLogShow) {
+				System.out.println(ExceptionConvert.getMessage(e));
+			}
         } catch (PropsException e) {
-        	System.out.println(e.getMessage());
-			e.printStackTrace();
+			if(isLogShow) {
+				System.out.println(ExceptionConvert.getMessage(e));
+			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			if(isLogShow) {
+				System.out.println(ExceptionConvert.getMessage(e));
+			}
 		} finally {
 			try {
 				server.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				if(isLogShow) {
+					System.out.println(ExceptionConvert.getMessage(e));
+				}
 			}
 		}
 			
@@ -104,7 +118,7 @@ public class MultiReceiverMain {
 	 *
 	 * @throws IOException
 	 */
-	static void receiveFile(String key, String path, InputStream is, OutputStream os) throws IOException {
+	/*static void receiveFile(String key, String path, InputStream is, OutputStream os) throws IOException {
 		String 	fname = null;
 		long	fsize = -1;
 		int		rbytes = -1;
@@ -171,7 +185,7 @@ public class MultiReceiverMain {
 			}
 		} 
 
-	}
+	}*/
 	
 	/**
 	 * socket에서 key 추출
@@ -179,23 +193,22 @@ public class MultiReceiverMain {
 	 * @return
 	 * @throws IOException
 	 */
-	static String getKey(InputStream is) throws IOException {
+	/*static String getKey(InputStream is) throws IOException {
 		byte[] 	buffer 	= new byte[1024];
 		is.read(buffer, 0, buffer.length);		
 		
 		return (new String(buffer)).trim();
-	}
+	}*/
 	
 	/**
 	 * READY 시그널 전송
-	 * @param os
 	 * @throws IOException
 	 */
-	static void sendReady(OutputStream os) throws IOException {
+	/*static void sendReady(OutputStream os) throws IOException {
 		byte[] ready = "READY".getBytes();
 		
 		os.write(ready, 0, ready.length);
-	}
+	}*/
 
 	public static String getNow() {
 		return  dFrmt.format(new Date());
