@@ -1,7 +1,0 @@
-receive.port = 21010
-file.wtchng = /mecar/snd/08
-file.wtchngEmrgncy = /mecar/snd/16
-file.realTimeWtchng = /mecar/snd/12
-file.laneTrffc = /mecar/snd/13
-file.laneTrffcWkly = /mecar/snd/14
-file.cmrSts = /mecar/snd/09
