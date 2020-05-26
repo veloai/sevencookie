@@ -1,7 +1,7 @@
 package swing.demon.cmrctl;
 
-import swing.demon.cmrctl.ctrl.CtrlInfoVO;
-import swing.demon.cmrctl.ctrl.CtrlInputVO;
+import swing.demon.cmrctl.vo.CtrlInfoVO;
+import swing.demon.cmrctl.vo.CtrlInputVO;
 import swing.demon.cmrctl.ctrl.DvcController;
 import swing.demon.cmrctl.ctrl.FileChecker;
 import swing.demon.cmrctl.exception.DataValidationException;

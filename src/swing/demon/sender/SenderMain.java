@@ -25,7 +25,7 @@ public class SenderMain {
             //isExceptionShow = props.getBoolean("is.Exception.show");
         } catch (IOException | PropsException io) {
             //io.printStackTrace();
-            if(isLogShow) {
+            if (isLogShow) {
                 System.out.println(ExceptionConvert.getMessage(io));
             }
             System.exit(-1);
@@ -35,7 +35,7 @@ public class SenderMain {
 
             @Override
             public void run() {
-                send(propPath);
+                send(cname);
             }
         };
         //- 초단위 변경
@@ -54,7 +54,8 @@ public class SenderMain {
         }
     }*/
 
-    static void send(String cname) {
+    }
+    static void send (String cname) {
         if(isLogShow) {
             System.out.println("##########   START Sync Sender  ##########");
         }
@@ -432,6 +433,28 @@ public class SenderMain {
         }
         return intSplit;
     }*/
+    static boolean existEof(String fileName) {
+
+        String[] list = new File(fileName).list(filter);
+
+        new File(fileName).deleteOnExit();
+//        System.out.println("eof file deleted!");
+        return list.length > 0? true : false;
+    }
+
+    private static List<File> getFileList(File dir) {
+        File[] aFiles = dir.listFiles();
+        List<File> lFiles = aFiles != null ? Arrays.asList(aFiles) : null;
+        List<File> ret = null;
+
+        if (lFiles != null) {
+            ret = new ArrayList<File>();
+
+            ret.addAll(lFiles);
+        }
+
+        return ret;
+    }
 
 }
 

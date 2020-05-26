@@ -24,13 +24,20 @@ import java.util.regex.Pattern;
 
 public class MainController implements Initializable {
 
-    @FXML private Button btnAdd;
+    @FXML private ListView<String> listBoxMain;
+
+    @FXML private ToggleGroup modGroup;
+
+    @FXML private TextField txtAddItem;
+
+    @FXML private TextArea txtProp;
 
     private ObservableList<String> listItems;
     private Stage stage;
 
     RadioButton rdBtn;
     Pattern pattern = Pattern.compile("[ !@#$%^&*(),?\":{}|<>]");
+
 
     StringBuilder sb;
     String propPath;
@@ -173,10 +180,10 @@ public class MainController implements Initializable {
         if (item!=null){
             String str = propPath+listBoxMain.getSelectionModel().getSelectedItem();
             //sndfile.run(str);
-            CmrctlMain cc = new CmrctlMain();
-            cc.cmrctl(str);
+//            CmrctlMain cc = new CmrctlMain();
+//            cc.cmrctl(str);
         }else{
-            console.setText("정보가 없습니다.");
+//            console.setText("정보가 없습니다.");
         }
     }
 }
