@@ -1,4 +1,4 @@
-package swing.demon.cmrctl.vo;
+package swing.demon.cmrctl.ctrl;
 
 import java.util.HashMap;
 
