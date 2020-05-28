@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import swing.demon.cmrctl.vo.CtrlInfoVO;
-import swing.demon.cmrctl.vo.CtrlInputVO;
 import swing.demon.util.props.Props;
 
 

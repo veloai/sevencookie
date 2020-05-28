@@ -9,14 +9,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Stage;
-import swing.tray.TrayMenu;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
+import swing.demon.cmrctl.CmrctlMain;
+import swing.demon.receiver.RcvMain;
+import swing.demon.sender.SndMain;
+
 import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -32,8 +35,22 @@ public class MainController implements Initializable {
 
     @FXML private TextArea txtProp;
 
+    @FXML private Button snd_start;
+    @FXML private Button snd_stop;
+    @FXML private Button rcv_start;
+    @FXML private Button rcv_stop;
+    @FXML private Button sht_start;
+    @FXML private Button sht_stop;
+    @FXML private Button kpa_start;
+    @FXML private Button kpa_stop;
+    @FXML private Button cctl_start;
+    @FXML private Button cctl_stop;
+
+    @FXML private TextFlow console_box;
+
+    @FXML private Label console;
+
     private ObservableList<String> listItems;
-    private Stage stage;
 
     RadioButton rdBtn;
     Pattern pattern = Pattern.compile("[ !@#$%^&*(),?\":{}|<>]");
@@ -175,15 +192,92 @@ public class MainController implements Initializable {
 
     }
 
-    public void startDemon(ActionEvent event) throws IOException {
+    public void onDemon(ActionEvent event) {
+        String log = "start!!!";
+        String time_log = "\n>>> [Sample time log] passed >>>" + log;
+        Text system_text = new Text();
+        system_text.setStyle("-fx-fill: #4F8A10;-fx-font-weight:bold;");
+        //setStyle("-fx-fill: RED;-fx-font-weight:normal;");
+        system_text.setText(time_log);
+        console_box.getChildren().add(system_text);
+
+//        cc.test("teset");
+        /*Text t1 = new Text();
+        Text text1=new Text("Some Text");
+        text1.setStyle("-fx-font-weight: bold");
+        console_log.getChildren().add(cc);*/
+
+        //System.out.println(((Control)event.getSource()).getId());
+        /*String getId = ((Control)event.getSource()).getId();
+        String[] options = getId.split("_");
+
         String item = listBoxMain.getSelectionModel().getSelectedItem();
         if (item!=null){
             String str = propPath+listBoxMain.getSelectionModel().getSelectedItem();
-            //sndfile.run(str);
-//            CmrctlMain cc = new CmrctlMain();
-//            cc.cmrctl(str);
+            String option_text = null;
+            try {
+                option_text = controlGetid(options[0],options[1],str);
+                console.setText(option_text);
+            } catch (Exception e) {
+                console.setText("옵션 설정이 잘못 되었습니다.");
+                e.printStackTrace();
+            }
         }else{
-//            console.setText("정보가 없습니다.");
+            console.setText("옵션을 선택해 주세요.");
+        }*/
+    }
+
+    public String controlGetid (String getid, String mode, String filePath){
+        String option_String="";
+        String opt1 = "";
+        String opt2 = "";
+        if (getid.equals("snd")){
+            opt1 = "Sender";
+            SndMain demon = new SndMain();
+            if (mode.equals("start")){
+                opt2 = "시작";
+                demon.sndStart(filePath);
+            }else{
+                opt2 = "정지";
+                demon.sndStop();
+            }
+        }else if(getid.equals("rcv")){
+            opt1 = "Receiver";
+            RcvMain demon = new RcvMain();
+            if (mode.equals("start")){
+                opt2 = "시작";
+                demon.rcvStart(filePath);
+            }else{
+                opt2 = "정지";
+                demon.rcvStop();
+            }
+        }else if(getid.equals("sht")){
+            opt1 = "Shooter";
+            if (mode.equals("start")){
+                opt2 = "시작";
+            }else{
+                opt2 = "정지";
+            }
+        }else if(getid.equals("kpa")){
+            opt1 = "KeepAlive";
+            if (mode.equals("start")){
+                opt2 = "시작";
+            }else{
+                opt2 = "정지";
+            }
+        }else if(getid.equals("cctl")){
+            opt1 = "CameraController";
+            CmrctlMain demon = new CmrctlMain();
+            if (mode.equals("start")){
+                opt2 = "시작";
+                demon.cmrctlStart(filePath);
+            }else{
+                opt2 = "정지";
+                demon.cmrctlStop();
+            }
         }
+
+        option_String = opt1+opt2;
+        return option_String;
     }
 }

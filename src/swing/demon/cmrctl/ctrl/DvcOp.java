@@ -1,4 +1,4 @@
-package swing.demon.cmrctl.vo;
+package swing.demon.cmrctl.ctrl;
 
 /**
  * Class Name : DvcOp.java

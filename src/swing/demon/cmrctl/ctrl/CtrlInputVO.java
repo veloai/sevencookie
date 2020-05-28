@@ -1,4 +1,4 @@
-package swing.demon.cmrctl.vo;
+package swing.demon.cmrctl.ctrl;
 
 public class CtrlInputVO {
     private static String RESULT_FORMAT = "%8s^%9s^%2s^%3s^%1s^%1s^%14s^%14s^";

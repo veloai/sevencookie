@@ -19,14 +19,16 @@ public class CmrctlMain {
     static String[] dvcIps = null;		//제어기 아이피
     static String[] dvcIds = null;		//제어기 아이디
 
-    public void cmrctl (String propPath) {
+    static Thread thread = null;
+
+    public void cmrctlStart (String propPath) {
         System.out.println("##########   START Cookie  ##########");
         long startlogT = System.currentTimeMillis();
         //prop 호출
         try {
             props = new Props(propPath);
         } catch (PropsException e) {
-            System.out.println(e.getMessage());
+            //System.out.println(e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -48,7 +50,7 @@ public class CmrctlMain {
         //keys.put(key, dir);
 
         Path path = Paths.get(props.getString("watching.dir"));
-        System.out.println(path);
+        //System.out.println(path);
         try {
             WatchService watchService = FileSystems.getDefault().newWatchService();
             //해당 디렉토리 경로에 와치서비스와 이벤트 등록
@@ -58,12 +60,17 @@ public class CmrctlMain {
                     StandardWatchEventKinds.ENTRY_MODIFY,
                     StandardWatchEventKinds.OVERFLOW);
 
-            Thread thread = new Thread(()->{
+            thread = new Thread(()->{
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         watchKey = watchService.take();//이벤트가 오길 대기(Blocking)
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        try {
+                            watchService.close();
+                        } catch (IOException de) {
+                            de.printStackTrace();
+                        }
                     }
                     List<WatchEvent<?>> events = watchKey.pollEvents();//이벤트들을 가져옴
                     for(WatchEvent<?> event : events) {
@@ -72,7 +79,7 @@ public class CmrctlMain {
                         //경로
                         Path fileName = (Path)event.context();
                         if(kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
-                            System.out.println("created something in directory");
+                            System.out.println("created something in directory thread id : "+thread.getId());
                             ControlCmr.processCtrl(path+File.separator+fileName, props);
                         }else if(kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
                             System.out.println("delete something in directory");
@@ -93,7 +100,7 @@ public class CmrctlMain {
                     }
                 }
             });
-            thread.setName("Thread watch");
+            thread.setName("Thread CameraCtl");
             thread.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -102,8 +109,12 @@ public class CmrctlMain {
         // #######################################
         long endLogt = System.currentTimeMillis();
         long logt = endLogt - startlogT;
-        System.out.println("걸린 시간: " + logt + " 밀리초");
+        //System.out.println("걸린 시간: " + logt + " 밀리초");
 
+    }
+    public void cmrctlStop () {
+        System.out.println(thread);
+        thread.interrupt();
     }
 }
 
