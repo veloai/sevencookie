@@ -43,13 +43,14 @@ public class DvcListMngr {
                     dvcMap.put((String)cmr.get("crmId"), (String)cmr.get("ip"));
                 }
             }
+        } catch (ParseException e) {
+            e.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
         }
+
     }
 
     public static String searchIPbyDeviceId(String cmrId) {

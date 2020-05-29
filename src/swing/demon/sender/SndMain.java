@@ -2,17 +2,13 @@ package swing.demon.sender;
 
 import org.apache.commons.io.FilenameUtils;
 import swing.demon.util.ExceptionConvert;
+import swing.demon.util.FileLog;
+import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
-import swing.demon.util.props.PropsException;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SndMain {
@@ -23,25 +19,24 @@ public class SndMain {
 
     public void sndStart (String propPath) {
         System.out.println("SndMain.sndStart");
-        long startlogT = System.currentTimeMillis();
         //prop 호출
-        try {
-            props = new Props(propPath);
-        } catch (PropsException e) {
-            //System.out.println(e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        props = new Props(propPath);
+
+        isLogShow = props.getBoolean("is.log.show");
+        //isExceptionShow = props.getBoolean("is.Exception.show");
+
+        if(isLogShow) {
+            String logPath = props.getString("log.file.path");
+            FileLog fileLog = new FileLog();
+            fileLog.setFileLog(logPath, "sender");
         }
-        //Path path = Paths.get(props.getString("watching.dir"));
 
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
 
             @Override
             public void run() {
-                send(propPath);
+                send();
             }
         };
         //- 초단위 변경
@@ -50,12 +45,11 @@ public class SndMain {
         //System.out.println("Scheduling " + props.getInt("schedule.interval") + " second.");
 
         timer.schedule(timerTask, 5000, interval);
-
     }
-    static void send (String cname) {
-        if(isLogShow) {
-            System.out.println("##########   START Sync Sender  ##########");
-        }
+
+    static void send () {
+        LogShow.logMessage(isLogShow, "##########   START Sync Sender  ##########");
+
         Socket socket = null;
         OutputStream os = null;
         InputStream is = null;
@@ -68,12 +62,10 @@ public class SndMain {
 
             for (int i = 0; i < dirs.length; i++) {
                 //- true 일 경우 eof 파일이 있을 경우, 그 시점에 모들 파일을 읽어서 전송
-                boolean isDirEof = (props.getString(dirs[i] + ".eof") != null && props.getString(dirs[i] + ".eof").equalsIgnoreCase("y")) ? true : false;
+                boolean isDirEof = props.getString(dirs[i] + ".eof") != null && props.getString(dirs[i] + ".eof").equalsIgnoreCase("y");
                 if (isDirEof) {
                     if (!existEof(props.getString(dirs[i]))) {
-                        if(isLogShow){
-                            System.out.println(dirs[i] + "[" + props.getString(dirs[i]) + "] eof condition, not exist eof file!");
-                        }
+                        LogShow.logMessage(isLogShow, dirs[i] + "[" + props.getString(dirs[i]) + "] eof condition, not exist eof file!");
                         continue;
                     } else {
 //                        new File(props.getString(dirs[i])).deleteOnExit();
@@ -109,9 +101,7 @@ public class SndMain {
             if(socket != null) socket.close();
         } catch (IOException e) {
             //e.printStackTrace();
-            if(isLogShow) {
-                System.out.println(ExceptionConvert.getMessage(e));
-            }
+            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
         }
 
     }
@@ -121,33 +111,28 @@ public class SndMain {
 
         new File(fileName).deleteOnExit();
 //        System.out.println("eof file deleted!");
-        return list.length > 0? true : false;
+        return (list != null ? list.length : 0) > 0;
     }
 
     static void sendFile(String key, OutputStream os, InputStream is, Props props) throws IOException {
         String path = props.getString(key);
         File dir = new File(path);
-        List<File> files = new ArrayList<>();
+        List<File> files;
         boolean isChangeLocNm = props.getBoolean("is.changeLoc.name");
         boolean isConvertNm = props.getBoolean("is.convert.name");
         files = getFileList(dir);
 
-        Boolean isRemove = props.getString("dirs.remove") != null && props.getString("dirs.remove").equalsIgnoreCase("y") ? true : false;
-        if(isLogShow) {
-            System.out.println("- Path :" + path);
-        }
+        Boolean isRemove = props.getString("dirs.remove") != null && props.getString("dirs.remove").equalsIgnoreCase("y");
+        LogShow.logMessage(isLogShow, "- Path :" + path);
+
         StringBuilder sb;
         //= chkEof 사용하지 않음 모조건 보냄
         for (File file : files) {
             if (file.isDirectory()) {
-                if(isLogShow) {
-                    System.out.println(file.getAbsoluteFile() + " is directory. skipped!!!");
-                }
+                LogShow.logMessage(isLogShow, file.getAbsoluteFile() + " is directory. skipped!!!");
                 continue;
             }
-            if(isLogShow) {
-                System.out.format("- Transfer file : %s  - File Size : %d \n", file.getName(), file.length());
-            }
+            LogShow.logMessage(isLogShow, String.format("- Transfer file : %s  - File Size : %d", file.getName(), file.length()));
             int rBytes = 0;
             byte[] buffer = new byte[props.getInt("send.buffersize")];
 
@@ -190,9 +175,8 @@ public class SndMain {
                 fis.close();
 
                 if (isRemove) {
-                    file.delete();
-                    if(isLogShow) {
-                        System.out.println(file.getAbsoluteFile() + " is deleted, after sending!");
+                    if(file.delete()){
+                        LogShow.logMessage(isLogShow, file.getAbsoluteFile() + " is deleted, after sending!");
                     }
                 }
             }
@@ -246,9 +230,7 @@ public class SndMain {
                 map.put(String.valueOf(i+1), nmSplit[i]);
             }
         } else {
-            if(isLogShow) {
-                System.out.format("설정값과 파일이름 매핑 개수가 다릅니다. : %s\n", onlyNm);
-            }
+            LogShow.logMessage(isLogShow, "설정값과 파일이름 매핑 개수가 다릅니다. : " + onlyNm);
             return null;
         }
         if(isConvertNm) {
@@ -273,9 +255,7 @@ public class SndMain {
                     if(convertNm != null) {
                         map.put(replaceVal, convertNm);
                     } else {
-                        if(isLogShow) {
-                            System.out.format("문자열 치환 실패(제대로 등록해 주세요.) : %s\n", cvStr.toString());
-                        }
+                        LogShow.logMessage(isLogShow, "문자열 치환 실패(제대로 등록해 주세요.) : " + cvStr.toString());
                         return null;
                     }
 
@@ -291,19 +271,14 @@ public class SndMain {
                             //System.out.println(completeLocChng[Integer.parseInt(t[i])-1] + "변환 성공");
                             map.put(val, convertNm);
                         } else {
-                            if(isLogShow) {
-                                System.out.format("문자열 치환 실패(제대로 등록해 주세요.) : %s\n", tm);
-                            }
+                            LogShow.logMessage(isLogShow, "문자열 치환 실패(제대로 등록해 주세요.) : " + tm);
                             return null;
                         }
                     } catch (NumberFormatException e) {
-                        if(isLogShow) {
-                            System.out.println("convert 위치 특수문자 빼고 제대로 입력해 주세요.");
-                        }
+                        LogShow.logMessage(isLogShow, "convert 위치 특수문자 빼고 제대로 입력해 주세요.");
                         return null;
                     }
                 }
-
 
             }
         }
@@ -325,6 +300,7 @@ public class SndMain {
 
     public void sndStop () {
         System.out.println("SndMain.sndStop");
+
 
     }
 

@@ -1,6 +1,8 @@
 
 package swing.demon.util.props;
 
+import swing.demon.util.ExceptionConvert;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -14,17 +16,24 @@ public class Props {
 	Map<String, Object> props = new HashMap();
     List<Object[]> propList = new ArrayList<Object[]>();
 
-    public Props(String path) throws PropsException, IOException {
-        File propsFile = this.openProps(path);
-        this.readProps(propsFile);
+    public Props(String path){
+
+        File propsFile;
+        try {
+            propsFile = this.openProps(path);
+            this.readProps(propsFile);
+        } catch (PropsException | IOException e) {
+            System.out.println(ExceptionConvert.getMessage(e));
+            System.exit(-1);
+        }
     }
 
     File openProps(String path) throws PropsException {
         File ret = new File(path);
         if (!ret.exists()) {
-            throw new PropsException("설정 파일이 없습니다.");
+            throw new PropsException(path + " 설정 파일이 없습니다.");
         } else if (!ret.canRead()) {
-            throw new PropsException("설정 파일을 읽을 수 없습니다.");
+            throw new PropsException(path + " 설정 파일을 읽을 수 없습니다.");
         } else {
             return ret;
         }
@@ -68,6 +77,6 @@ public class Props {
         if(this.props.get(key) == null) {
             return false;
         }
-        return Boolean.valueOf((String)this.props.get(key));
+        return Boolean.parseBoolean((String)this.props.get(key));
     }
 }

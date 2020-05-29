@@ -1,5 +1,8 @@
 package swing.demon.shooter;
 
+import swing.demon.util.ExceptionConvert;
+import swing.demon.util.FileLog;
+import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 import swing.demon.util.props.PropsException;
 
@@ -25,7 +28,7 @@ public class FileChecker {
     private final String cname;
 
     static Props props;
-
+    static boolean isLogShow = false;
     /**
      * Creates a WatchService and registers the given directory
      */
@@ -34,8 +37,8 @@ public class FileChecker {
         this.keys = new HashMap<WatchKey, Path>();
         this.cname = cname;
         Path dir = Paths.get(props.getString("watching.dir"));
-        System.out.println("Waching directory[" + dir + "]");
-        System.out.println("watching.dir.file.remove[" + props.getString("watching.dir.file.remove") + "]");
+        //System.out.println("Waching directory[" + dir + "]");
+        //System.out.println("watching.dir.file.remove[" + props.getString("watching.dir.file.remove") + "]");
         registerDirectory(dir);
     }
  
@@ -78,7 +81,7 @@ public class FileChecker {
  
             Path dir = keys.get(key);
             if (dir == null) {
-                System.err.println("WatchKey not recognized!!");
+                LogShow.logMessage(isLogShow, "Shooter Class WatchKey not recognized!!");
                 continue;
             }
  
@@ -92,17 +95,17 @@ public class FileChecker {
                 Path child = dir.resolve(name);
  
                 // print out event
-                System.out.format("%s: %s\n", event.kind().name(), child);
+                //System.out.format("%s: %s\n", event.kind().name(), child);
                 // if directory is created, and watching recursively, then register it and its sub-directories
                 if (kind == ENTRY_CREATE || (kind == ENTRY_MODIFY && new File(child.toAbsolutePath().toString()).length() > 0)) {
 
                     try {
                         Thread.sleep(props.getInt("watching.action.delay"));
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
                     }
 
-                    Shooter.processShooter(child.toAbsolutePath().toString(), props);
+                    Shooter.processShooter(child.toAbsolutePath().toString(), props, isLogShow);
 //                if (kind == ENTRY_CREATE) {
 //                    SingleSenderMain.sendOne(cname, child.toAbsolutePath().toString());
                     /*
@@ -134,14 +137,13 @@ public class FileChecker {
 //        final 	String 		cname		= args.length <= 0 || args[0] == null || args[0].isEmpty() ? null : args[0];
         String cname = args[0];
 //        Path dir = Paths.get(args[1]== null ? "C:\\was\\mecar\\snd\\08" : args[1]);
-        try {
-            props = new Props(cname == null ? "./kpAlvShooter.properties" : cname);
-        } catch (PropsException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        props = new Props(cname == null ? "./kpAlvShooter.properties" : cname);
+        isLogShow = props.getBoolean("is.log.show");
+
+        if(isLogShow) {
+            String logPath = props.getString("log.file.path");
+            FileLog fileLog = new FileLog();
+            fileLog.setFileLog(logPath, "shooter");
         }
         new FileChecker(cname).processEvents();
     }

@@ -17,16 +17,7 @@ public class kpMain {
 
         //time check
         //long startlogT = System.currentTimeMillis();
-        try {
-            props = new Props(pth);
-        } catch (PropsException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        props = new Props(pth);
 
 
     }

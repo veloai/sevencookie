@@ -1,5 +1,8 @@
 package swing.demon.cmrctl;
 
+import swing.demon.util.ExceptionConvert;
+import swing.demon.util.FileLog;
+import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 import swing.demon.util.props.PropsException;
 
@@ -21,18 +24,17 @@ public class CmrctlMain {
 
     static Thread thread = null;
 
+    boolean isLogShow = false;
     public void cmrctlStart (String propPath) {
-        System.out.println("##########   START Cookie  ##########");
         long startlogT = System.currentTimeMillis();
         //prop 호출
-        try {
-            props = new Props(propPath);
-        } catch (PropsException e) {
-            //System.out.println(e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        props = new Props(propPath);
+
+        isLogShow = props.getBoolean("is.log.show");
+        if(isLogShow) {
+            String logPath = props.getString("log.file.path");
+            FileLog fileLog = new FileLog();
+            fileLog.setFileLog(logPath, "cmrCtrl");
         }
 
         /* option */
@@ -56,20 +58,18 @@ public class CmrctlMain {
             //해당 디렉토리 경로에 와치서비스와 이벤트 등록
             path.register(watchService,
                     StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_DELETE,
-                    StandardWatchEventKinds.ENTRY_MODIFY,
-                    StandardWatchEventKinds.OVERFLOW);
+                    StandardWatchEventKinds.ENTRY_MODIFY);
 
             thread = new Thread(()->{
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         watchKey = watchService.take();//이벤트가 오길 대기(Blocking)
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
                         try {
                             watchService.close();
                         } catch (IOException de) {
-                            de.printStackTrace();
+                            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(de));
                         }
                     }
                     List<WatchEvent<?>> events = watchKey.pollEvents();//이벤트들을 가져옴
@@ -79,23 +79,19 @@ public class CmrctlMain {
                         //경로
                         Path fileName = (Path)event.context();
                         if(kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
-                            System.out.println("created something in directory thread id : "+thread.getId());
-                            ControlCmr.processCtrl(path+File.separator+fileName, props);
-                        }else if(kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-                            System.out.println("delete something in directory");
+                            //System.out.println("created something in directory thread id : "+thread.getId());
+                            ControlCmr.processCtrl(path+File.separator+fileName, props, isLogShow);
                         }else if(kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
-                            System.out.println("modified something in directory");
-                        }else if(kind.equals(StandardWatchEventKinds.OVERFLOW)) {
-                            System.out.println("overflow");
+                            //System.out.println("modified something in directory");
                         }else {
-                            System.out.println("hello world");
+                            //System.out.println("hello world");
                         }
                     }
                     if(!watchKey.reset()) {
                         try {
                             watchService.close();
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
                         }
                     }
                 }
@@ -103,7 +99,7 @@ public class CmrctlMain {
             thread.setName("Thread CameraCtl");
             thread.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
         }
 
         // #######################################
@@ -113,7 +109,7 @@ public class CmrctlMain {
 
     }
     public void cmrctlStop () {
-        System.out.println(thread);
+        //System.out.println(thread);
         thread.interrupt();
     }
 }

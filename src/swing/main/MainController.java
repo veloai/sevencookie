@@ -50,6 +50,7 @@ public class MainController implements Initializable {
 
     @FXML private Label console;
 
+    @FXML private TextArea logText;
     private ObservableList<String> listItems;
 
     RadioButton rdBtn;
@@ -174,20 +175,7 @@ public class MainController implements Initializable {
             txtProp.clear();
             File file = new File(propPath+File.separator+listBoxMain.getSelectionModel().getSelectedItem().toString());
 
-            try {
-                reader = new BufferedReader(new FileReader(file));
-
-                String line = "";
-                while((line = reader.readLine()) != null){
-                    txtProp.appendText(line+"\r\n");
-                }
-                reader.close();
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            textAreaLineInsert(file, txtProp);
         }
 
     }
@@ -279,5 +267,42 @@ public class MainController implements Initializable {
 
         option_String = opt1+opt2;
         return option_String;
+    }
+
+    @FXML
+    public void logTest(ActionEvent action) throws FileNotFoundException {
+        System.out.println("클릭");
+        File file = new File("c:/receivert/log.txt");
+        PrintStream printStream = new PrintStream(new FileOutputStream(file, true));
+        // standard out과 err을 file로 변경
+        System.setOut(printStream);
+        // file로 출력
+        System.out.println("테스트99999");
+        System.out.println("테스트9999988");
+        System.out.println("테스트99999777777777");
+
+        BufferedReader reader = null;
+        //3번째 textarea에다가 txt내용 표시
+        logText.clear();
+
+        textAreaLineInsert(file, logText);
+    }
+
+    private void textAreaLineInsert(File file, TextArea logText) {
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new FileReader(file));
+
+            String line = "";
+            while((line = reader.readLine()) != null){
+                logText.appendText(line+"\r\n");
+            }
+            reader.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -2,6 +2,8 @@ package swing.demon.shooter;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import swing.demon.util.ExceptionConvert;
+import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 
 import java.io.*;
@@ -14,21 +16,20 @@ public class Shooter {
 
     private static JSONParser parser = new JSONParser();
     final static SimpleDateFormat dFrmt = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-
-    public static void processShooter(String fileName, Props props) {
+    static boolean isLogShow = false;
+    public static void processShooter(String fileName, Props props, Boolean isShow) {
 
         String				serverUrl		= (String) props.get("serverUrl");
         String				prgmUrl			= (String) props.get("prgmUrl");
-
+        isLogShow = isShow;
         readFile(fileName, serverUrl, prgmUrl);
 
-        boolean isRemove = (props.getString("watching.dir.file.remove") != null) && props.getString("watching.dir.file.remove").equalsIgnoreCase("y") ? true : false;
+        boolean isRemove = (props.getString("watching.dir.file.remove") != null) && props.getString("watching.dir.file.remove").equalsIgnoreCase("y");
         if (isRemove) {
-
             try {
                 new File(fileName).delete();
-            } catch (Exception e) {
-
+            } catch (SecurityException e) {
+                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
             }
         }
     }
@@ -41,19 +42,16 @@ public class Shooter {
 
             String thisLine  = null;
             while ((thisLine = br.readLine()) != null) {           // 줄단위로 읽기
-                System.out.println(thisLine);
+                //System.out.println(thisLine);
 
                 jsonObject = (JSONObject)parser.parse(thisLine);
-
-                System.out.println(jsonObject.toJSONString());
-
                 doKeepAlive(serverUrl, prgmUrl, jsonObject.toJSONString());
             }
 
         } catch (IOException io) {
-            System.out.println(io.getMessage());
+            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(io));
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
         } finally {
             if (br != null) try{br.close();}catch (IOException io){}
         }
@@ -62,9 +60,9 @@ public class Shooter {
     }
 
     public static void doKeepAlive(String serverUrl, String prgmUrl, String dvcJson) throws IOException {
-        System.out.println("###### Send KeepAlive Start ######");
-        System.out.println("- " + dFrmt.format(new Date()));
-        System.out.println(dvcJson);
+        LogShow.logMessage(isLogShow, "###### Send KeepAlive Start ######");
+        //System.out.println("- " + dFrmt.format(new Date()));
+        LogShow.logMessage(isLogShow, dvcJson);
 
         URL url 			= new URL(serverUrl + prgmUrl);
         HttpURLConnection conn 			= (HttpURLConnection) url.openConnection();
@@ -84,13 +82,12 @@ public class Shooter {
         String line = null;
 
         while ((line = br.readLine()) != null) {
-            System.out.println(line);
+            LogShow.logMessage(isLogShow, line);
         }
 
         osw.close();
         br.close();
-
-        System.out.println("###### Send KeepAlive End ######");
+        LogShow.logMessage(isLogShow, "###### Send KeepAlive End ######");
     }
 
 }
