@@ -7,6 +7,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -50,6 +51,13 @@ public class TrayMenu extends Frame {
                 handleTerminate();
             });
 
+            /*if (e.getClickCount() == 2) {
+                if((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK){
+                    System.out.println("double click");
+                }
+                System.out.println("double click");
+                handleShow();
+            }*/
             trayIcon.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {

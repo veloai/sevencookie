@@ -48,14 +48,14 @@
                                              <VBox.margin>
                                                 <Insets bottom="10.0" top="10.0" />
                                              </VBox.margin></TextField>
-                                          <HBox fillHeight="false" prefHeight="22.0" prefWidth="105.0">
+                                          <HBox alignment="CENTER" fillHeight="false" prefHeight="28.0" prefWidth="165.0" VBox.vgrow="SOMETIMES">
                                              <children>
-                                                  <Button fx:id="btnAdd" contentDisplay="CENTER" mnemonicParsing="false" onAction="#addAction" text="추가" textAlignment="CENTER">
+                                                  <Button fx:id="btnAdd" contentDisplay="CENTER" mnemonicParsing="false" onAction="#addAction" prefHeight="22.0" prefWidth="55.0" text="추가" textAlignment="CENTER">
                                                        <HBox.margin>
                                                           <Insets right="20.0" />
                                                        </HBox.margin>
                                                   </Button>
-                                                  <Button fx:id="btnDelete" contentDisplay="CENTER" mnemonicParsing="false" onAction="#deleteAction" text="삭제" textAlignment="CENTER" />
+                                                  <Button fx:id="btnDelete" contentDisplay="CENTER" mnemonicParsing="false" onAction="#deleteAction" prefHeight="22.0" prefWidth="55.0" text="삭제" textAlignment="CENTER" />
                                              </children>
                                              <VBox.margin>
                                                 <Insets bottom="5.0" />
@@ -87,8 +87,8 @@
                   </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
-                        <!--<TextArea fx:id="console_log" layoutY="-3.0" prefHeight="357.0" prefWidth="1035.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-2.0" AnchorPane.topAnchor="0.0" />-->
-                         <TextFlow fx:id="console_box" layoutY="-3.0" prefHeight="357.0" prefWidth="1035.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-2.0" AnchorPane.topAnchor="0.0"></TextFlow>
+                        <TextArea fx:id="logText" layoutY="-3.0" prefHeight="357.0" prefWidth="1035.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-2.0" AnchorPane.topAnchor="0.0" />
+<!--                         <TextFlow fx:id="console_box" layoutY="-3.0" prefHeight="357.0" prefWidth="1035.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-2.0" AnchorPane.topAnchor="0.0" />-->
                      </children>
                   </AnchorPane>
               </items>
