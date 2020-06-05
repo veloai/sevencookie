@@ -26,66 +26,13 @@ public class kpAlvMain {
 	static Props props;
 	final static SimpleDateFormat dFrmt = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	static boolean isLogShow = false;
-	static void initPorpos(String[] args) {
-		final String cname = args.length <= 0 || args[0] == null || args[0].isEmpty() ? null : args[0];
+	static Timer timer;
+	static void initPorpos(String path) {
+		//final String cname = args.length <= 0 || args[0] == null || args[0].isEmpty() ? null : args[0];
 		
-		kpAlvMain.props = new Props(cname == null ? "./kpAlvSim.properties" : cname);
+		kpAlvMain.props = new Props(path);
 	}
 	
-	public static void main(String[] args) {
-		kpAlvMain.initPorpos(args);
-
-		isLogShow = props.getBoolean("is.log.show");
-		if(isLogShow) {
-			String logPath = props.getString("log.file.path");
-			FileLog fileLog = new FileLog();
-			fileLog.setFileLog(logPath, "kpAlive");
-		}
-
-		Timer 		timer 		= new Timer();
-		TimerTask 	timerTask 	= new TimerTask() {
-			@Override
-			public void run() {
-				BufferedWriter bw = null;
-				try {
-
-					JSONArray dvcList = kpAlvMain.parseDvcList();
-					kpAlvMain.chkSts(dvcList);
-					String sido = props.getString("sido.cd");
-					String sigungu = props.getString("sigungu.cd");
-					String fileName = sido + sigungu + "_" + kpAlvMain.dFrmt.format(new Date());
-					bw = new BufferedWriter(new FileWriter(props.getString("trns.json") + File.separator + fileName + ".json", true));
-
-					//String sndDate = null;
-					for (int i =0; i < dvcList.size(); i++) {
-						JSONObject dvc = (JSONObject) dvcList.get(i);
-//						JSONArray cmrList = (JSONArray)dvc.get("cmrList");
-//						for (int ii=0; ii < cmrList.size(); ii++) {
-//							JSONObject	cmr	= 	(JSONObject) cmrList.get(ii);
-//							sndDate = ((String)dvc.get("sndDate")).substring(0,14);
-//
-//							String thisResult = String.format("%2s^%3s^%9s^%14s^%1s^%14s", sido, sigungu, cmr.get("crmId"), sndDate, cmr.get("sts").equals("1")? "N" : "F", sndDate);
-//							bw.write(thisResult);
-//							bw.newLine();
-//						}
-//						kpAlvSimMain.doKeepAlive(dvc.toJSONString());
-						bw.write(dvc.toJSONString());
-						bw.newLine();
-						LogShow.logMessage(isLogShow, dvc.toJSONString());
-					}
-
-//					new File(props.getString("trns.json") + File.separator  + "dummy.eof").createNewFile();
-				} catch (Exception e) {
-					LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
-				} finally {
-					if (bw != null) try {bw.close();}catch (Exception e){}
-				}
-			}
-		};
-		
-		timer.schedule(timerTask, 0, props.getInt("interval"));
-	}
-
 	static JSONArray parseDvcList() {
 		JSONParser 	parser 	= new JSONParser();
 		JSONArray	ret 	= null;
@@ -142,5 +89,64 @@ public class kpAlvMain {
 
 		return ret;
 	}
-	
+
+	public void kpStart(String filePath) {
+		if(timer == null) {
+
+			kpAlvMain.initPorpos(filePath);
+
+			isLogShow = props.getBoolean("is.log.show");
+			if(isLogShow) {
+				String logPath = props.getString("log.file.path");
+				FileLog fileLog = new FileLog();
+				fileLog.setFileLog(logPath, "kpAlive");
+			}
+
+			timer = new Timer();
+			TimerTask 	timerTask 	= new TimerTask() {
+				@Override
+				public void run() {
+					BufferedWriter bw = null;
+					try {
+
+						JSONArray dvcList = kpAlvMain.parseDvcList();
+						kpAlvMain.chkSts(dvcList);
+						String sido = props.getString("sido.cd");
+						String sigungu = props.getString("sigungu.cd");
+						String fileName = sido + sigungu + "_" + kpAlvMain.dFrmt.format(new Date());
+						bw = new BufferedWriter(new FileWriter(props.getString("trns.json") + File.separator + fileName + ".json", true));
+
+						//String sndDate = null;
+						for (int i =0; i < dvcList.size(); i++) {
+							JSONObject dvc = (JSONObject) dvcList.get(i);
+							bw.write(dvc.toJSONString());
+							bw.newLine();
+							LogShow.logMessage(isLogShow, dvc.toJSONString());
+						}
+
+					} catch (Exception e) {
+						//LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+						e.printStackTrace();
+						timer.cancel();
+					} finally {
+						if (bw != null) try {bw.close();}catch (Exception e){}
+					}
+				}
+			};
+
+			timer.schedule(timerTask, 0, props.getInt("interval"));
+		} else {
+			LogShow.logMessage(isLogShow, "이미 실행중 입니다.");
+		}
+	}
+
+	public void kpStop() {
+		if(timer != null) {
+			timer.cancel();
+			timer = null;
+			LogShow.logMessage(isLogShow, "정상적으로 KeepAlive 종료");
+		} else {
+			LogShow.logMessage(isLogShow, "실행중인 keepAlive thread 없습니다.");
+		}
+	}
 }
