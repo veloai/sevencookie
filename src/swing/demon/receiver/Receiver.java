@@ -20,6 +20,7 @@ public class Receiver implements Runnable {
         this.isLogShow = isLogShow;
     }
 
+    @Override
     public void run() {
 
         try (OutputStream os = socket.getOutputStream();

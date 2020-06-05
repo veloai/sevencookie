@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import swing.demon.util.FileLog;
 
 /**
  *
@@ -20,13 +21,14 @@ public class MaterialLogin extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("MaterialLogin.fxml"));
+        Parent root = FXMLLoader.load(Class.forName("swing.login.MaterialLogin").getResource("MaterialLogin.fxml"));
 
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.show();
+
     }
 
     /**

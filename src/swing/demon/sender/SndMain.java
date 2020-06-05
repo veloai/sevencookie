@@ -16,7 +16,7 @@ public class SndMain {
     static Props props;
     private static GenericExtFilter filter = new GenericExtFilter(".eof");
     static boolean isLogShow = false;
-
+    static Timer timer;
     public void sndStart (String propPath) {
         System.out.println("SndMain.sndStart");
         //prop 호출
@@ -30,21 +30,24 @@ public class SndMain {
             FileLog fileLog = new FileLog();
             fileLog.setFileLog(logPath, "sender");
         }
+        if(timer == null) {
 
-        Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
+            timer = new Timer();
+            TimerTask timerTask = new TimerTask() {
 
-            @Override
-            public void run() {
-                send();
-            }
-        };
-        //- 초단위 변경
-        int interval = props.getInt("schedule.interval") * 1000;
+                @Override
+                public void run() {
+                    send();
+                }
+            };
+            //- 초단위 변경
+            int interval = props.getInt("schedule.interval") * 1000;
 
-        //System.out.println("Scheduling " + props.getInt("schedule.interval") + " second.");
+            timer.schedule(timerTask, 5000, interval);
+        } else {
+            LogShow.logMessage(isLogShow, "이미 실행중 입니다.");
+        }
 
-        timer.schedule(timerTask, 5000, interval);
     }
 
     static void send () {
@@ -299,9 +302,21 @@ public class SndMain {
     }
 
     public void sndStop () {
-        System.out.println("SndMain.sndStop");
+        if(timer != null) {
+            timer.cancel();
+            timer = null;
+            LogShow.logMessage(isLogShow, "정상적으로 Sender 종료");
+        } else {
+            LogShow.logMessage(isLogShow, "실행중인 Sender 없습니다.");
+        }
 
+    }
 
+    static public String getLogPath() {
+        if(props != null) {
+            return props.getString("log.file.path");
+        }
+        return null;
     }
 
 }

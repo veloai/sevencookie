@@ -21,16 +21,18 @@ public class RcvMain {
 	private static ExecutorService threadPool;
 	final static SimpleDateFormat dFrmt = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	static boolean isLogShow = false;
-
+	static Thread thread;
+	static ServerSocket server = null;
 	/**
 	 * start
 	 * @param propPath
 	 */
 	public void rcvStart (String propPath) {
-		System.out.println("RcvMain.rcvStart");
 
+		System.out.println("=========== RcvMain.rcvStart ==========");
 		//prop 호출
-		try (ServerSocket server = new ServerSocket()){
+		try {
+			server = new ServerSocket();
 			props = new Props(propPath);
 
 			int port = props.getInt("receive.port");
@@ -46,11 +48,12 @@ public class RcvMain {
 			server.bind(inet);
 			LogShow.logMessage(isLogShow, "##########   START FTrnsfr RcvMain  ##########");
 			LogShow.logMessage(isLogShow, "- PORT : " + port);
-
-			while (true) {
-				try (Socket client = server.accept()){
-					threadPool.execute(new Receiver(client, props, isLogShow));
-				}
+			if(thread == null) {
+				thread = new ReceiverThread(server, props, isLogShow);
+				thread.setName("receiverMain");
+				thread.start();
+			} else {
+				LogShow.logMessage(isLogShow, "이미 실행중 입니다.");
 			}
 
 		} catch (IOException io) {
@@ -65,7 +68,25 @@ public class RcvMain {
 	 */
 	public void rcvStop () {
 		System.out.println("RcvMain.rcvStop");
+		if(thread != null) {
+			thread.interrupt();
+			LogShow.logMessage(isLogShow, "정상적으로 receiver thread 종료");
+			try {
+				server.close();
+				thread = null;
+			} catch (IOException e) {
+				LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+			}
+		} else {
+			LogShow.logMessage(isLogShow, "실행중인 receiver thread 없습니다.");
+		}
+	}
 
+	public String getLogPath() {
+		if(props != null) {
+			return props.getString("log.file.path");
+		}
+		return null;
 	}
 
 	public static String getNow() {

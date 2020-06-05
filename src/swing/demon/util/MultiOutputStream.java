@@ -2,11 +2,12 @@ package swing.demon.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
 public class MultiOutputStream extends OutputStream
 {
     OutputStream[] outputStreams;
-
     public MultiOutputStream(OutputStream... outputStreams)
     {
         this.outputStreams= outputStreams;
@@ -24,6 +25,7 @@ public class MultiOutputStream extends OutputStream
     {
         for (OutputStream out: outputStreams)
             out.write(b);
+
     }
 
     @Override

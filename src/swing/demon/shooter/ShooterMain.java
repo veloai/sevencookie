@@ -1,10 +1,10 @@
-package swing.demon.cmrctl;
+package swing.demon.shooter;
 
+import swing.demon.cmrctl.ControlCmr;
 import swing.demon.util.ExceptionConvert;
 import swing.demon.util.FileLog;
 import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
-import swing.demon.util.props.PropsException;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,20 +12,16 @@ import java.nio.file.*;
 import java.util.List;
 import java.util.Map;
 
-public class CmrctlMain {
-
+public class ShooterMain {
     static Props props;
     private WatchService watchService;
-    private Map<WatchKey,Path> keys;
+    private Map<WatchKey, Path> keys;
     private WatchKey watchKey;
 
-    static String[] dvcIps = null;		//제어기 아이피
-    static String[] dvcIds = null;		//제어기 아이디
-
     static Thread thread = null;
-
     boolean isLogShow = false;
-    public void cmrctlStart (String propPath) {
+
+    public void shooterStart (String propPath) {
         //prop 호출
         props = new Props(propPath);
 
@@ -33,22 +29,9 @@ public class CmrctlMain {
         if(isLogShow) {
             String logPath = props.getString("log.file.path");
             FileLog fileLog = new FileLog();
-            fileLog.setFileLog(logPath, "cmrCtrl");
+            fileLog.setFileLog(logPath, "shooter");
         }
 
-        /* option */
-        //실시간 파일 검지 서비스 정의 --기존 처리 내용
-        //watchService = FileSystems.getDefault().newWatchService();
-        //keys = new HashMap<WatchKey, Path>();
-
-        //실시간 파일 검지 위치 설정 -- 기존 처리 내용
-        //Path dir = Paths.get(props.getString("watching.dir"));
-        //System.out.println("Waching directory:[" + dir + "]");
-
-
-        //파일 이벤트 정보 입력 -- 기존 처리 내용
-        //WatchKey key = dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-        //keys.put(key, dir);
         if(thread == null) {
 
             Path path = Paths.get(props.getString("watching.dir"));
@@ -80,7 +63,7 @@ public class CmrctlMain {
                             Path fileName = (Path)event.context();
                             if(kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
                                 //System.out.println("created something in directory thread id : "+thread.getId());
-                                ControlCmr.processCtrl(path+File.separator+fileName, props, isLogShow);
+                                Shooter.processShooter(path+ File.separator+fileName, props, isLogShow);
                             }else if(kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                                 //System.out.println("modified something in directory");
                             }else {
@@ -96,7 +79,7 @@ public class CmrctlMain {
                         }
                     }
                 });
-                thread.setName("Thread CameraCtl");
+                thread.setName("Thread shooter");
                 thread.start();
             } catch (IOException e) {
                 LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
@@ -104,17 +87,15 @@ public class CmrctlMain {
         } else {
             LogShow.logMessage(isLogShow, "이미 실행중 입니다.");
         }
-
-
     }
-    public void cmrctlStop () {
+
+    public void shooterStop () {
         if(thread != null) {
             thread.interrupt();
             thread = null;
-            LogShow.logMessage(isLogShow, "정상적으로 Cmrctrl 종료");
+            LogShow.logMessage(isLogShow, "정상적으로 Shooter 종료");
         } else {
-            LogShow.logMessage(isLogShow, "실행중인 Cmrctrl thread 없습니다.");
+            LogShow.logMessage(isLogShow, "실행중인 shooter thread 없습니다.");
         }
     }
 }
-

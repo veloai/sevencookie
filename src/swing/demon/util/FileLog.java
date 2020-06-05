@@ -1,9 +1,7 @@
 package swing.demon.util;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -13,21 +11,30 @@ public class FileLog {
         try {
             StringBuilder sb = new StringBuilder();
             if(filePath != null) {
-                sb.append(filePath).append(File.separator).append(fileName).append("_").append(fomati.format(new Date())).append(".log");
+                //sb.append(filePath).append(File.separator).append(fileName).append("_").append(fomati.format(new Date())).append(".log");
+                sb.append(filePath).append(File.separator).append(fileName).append(".log");
                 FileOutputStream fOut = new FileOutputStream(sb.toString(), true);
 
                 MultiOutputStream multiOut = new MultiOutputStream(System.out, fOut);
 
-                PrintStream stdout = new PrintStream(multiOut);
+                PrintStream stdout = new PrintStream(multiOut, true, StandardCharsets.UTF_8.toString());
 
                 System.setOut(stdout);
             } else {
                 System.out.println("로그경로가 null 입니다.");
             }
 
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
+    }
+    public File getFile(String filePath, String fileName) {
+        StringBuilder sb = new StringBuilder();
+        //sb.append(filePath).append(File.separator).append(fileName).append("_").append(fomati.format(new Date())).append(".log");
+        sb.append(filePath).append(File.separator).append(fileName).append(".log");
+        File file = new File(sb.toString());
+
+        return file;
     }
 }

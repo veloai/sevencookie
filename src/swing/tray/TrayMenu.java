@@ -23,7 +23,7 @@ public class TrayMenu extends Frame {
     public void addAppToTray() {
         try {
             if (!SystemTray.isSupported()) {
-                System.out.println("Failed to display tray icon - no system tray support");
+                System.out.println("###############Failed to display tray icon - no system tray support##############3");
                 return;
             }
             Toolkit.getDefaultToolkit();
@@ -54,7 +54,7 @@ public class TrayMenu extends Frame {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getClickCount() == 2) {
-                        System.out.println("double click");
+                        //System.out.println("double click");
                         handleShow();
                     }
                 }

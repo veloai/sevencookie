@@ -1,3 +1,4 @@
+/*
 package swing.demon.shooter;
 
 import swing.demon.util.ExceptionConvert;
@@ -16,11 +17,13 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
+*/
 /**
  *
  *  https://drive.google.com/drive/folders/1r69WdDnCta3Riz1L2DfE3UYCF1vF-V6-?usp=sharing
  *
- */
+ *//*
+
 public class FileChecker {
 
     private final WatchService watcher;
@@ -29,9 +32,11 @@ public class FileChecker {
 
     static Props props;
     static boolean isLogShow = false;
-    /**
+    */
+/**
      * Creates a WatchService and registers the given directory
-     */
+     *//*
+
     FileChecker(String cname ) throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<WatchKey, Path>();
@@ -42,18 +47,22 @@ public class FileChecker {
         registerDirectory(dir);
     }
  
-    /**
+    */
+/**
      * Register the given directory with the WatchService; This function will be called by FileVisitor
-     */
+     *//*
+
     private void registerDirectory(Path dir) throws IOException 
     {
         WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
         keys.put(key, dir);
     }
  
-    /**
+    */
+/**
      * Register the given directory, and all its sub-directories, with the WatchService.
-     */
+     *//*
+
     private void walkAndRegisterDirectories(final Path start) throws IOException {
         // register directory and sub-directories
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
@@ -65,9 +74,11 @@ public class FileChecker {
         });
     }
  
-    /**
+    */
+/**
      * Process all events for keys queued to the watcher
-     */
+     *//*
+
     void processEvents() {
         for (;;) {
  
@@ -108,7 +119,8 @@ public class FileChecker {
                     Shooter.processShooter(child.toAbsolutePath().toString(), props, isLogShow);
 //                if (kind == ENTRY_CREATE) {
 //                    SingleSenderMain.sendOne(cname, child.toAbsolutePath().toString());
-                    /*
+                    */
+/*
                     try {
                         if (Files.isDirectory(child)) {
                             walkAndRegisterDirectories(child);
@@ -116,7 +128,8 @@ public class FileChecker {
                     } catch (IOException x) {
                         // do something useful
                     }
-                       */
+                       *//*
+
                 }
             }
  
@@ -147,4 +160,4 @@ public class FileChecker {
         }
         new FileChecker(cname).processEvents();
     }
-}
+}*/

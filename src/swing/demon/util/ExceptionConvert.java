@@ -1,5 +1,8 @@
 package swing.demon.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 public class ExceptionConvert {
     public static String getMessage(Exception e) {
         StringBuilder sb = new StringBuilder();
@@ -14,5 +17,12 @@ public class ExceptionConvert {
         sb.append(ste[0].toString()).append("\n");
         sb.append(ste[ste.length-1]);
         return sb.toString();
+    }
+
+    public static String TraceAllError(Exception e) {
+        ByteArrayOutputStream out=  new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(out);
+        e.printStackTrace(printStream);
+        return out.toString();
     }
 }

@@ -4,51 +4,55 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<?import javafx.scene.text.TextFlow?>
-<AnchorPane fx:id="anchorPane" prefHeight="721.0" prefWidth="1029.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="swing.main.MainController">
+<AnchorPane fx:id="anchorPane" prefHeight="440.0" prefWidth="1218.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="swing.main.MainController">
    <children>
-      <StackPane layoutY="-1.0" prefHeight="730.0" prefWidth="933.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-6.0" AnchorPane.topAnchor="0.0">
+      <StackPane layoutY="-1.0" prefHeight="417.0" prefWidth="1035.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-6.0" AnchorPane.topAnchor="0.0">
          <children>
-            <SplitPane dividerPositions="0.49862637362637363" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+            <SplitPane orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
               <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
-                        <SplitPane dividerPositions="0.31534883720930235, 0.6641860465116279" layoutY="-5.0" prefHeight="368.0" prefWidth="931.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <SplitPane dividerPositions="0.2819672131147541, 0.6098360655737705" layoutY="-5.0" prefHeight="368.0" prefWidth="931.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <items>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                  <children>
-                                     <RadioButton layoutX="31.0" layoutY="55.0" mnemonicParsing="false" text="sender" userData="src/swing/demon/sender/properties">
+                                     <RadioButton layoutX="39.0" layoutY="97.0" mnemonicParsing="false" text="sender" userData="properties/sender/">
                                          <toggleGroup>
                                             <ToggleGroup fx:id="modGroup" />
                                          </toggleGroup>
                                      </RadioButton>
-                                     <RadioButton layoutX="31.0" layoutY="110.0" mnemonicParsing="false" text="receiver" toggleGroup="$modGroup" userData="src/swing/demon/receiver/properties" />
-                                     <RadioButton layoutX="31.0" layoutY="165.0" mnemonicParsing="false" text="shooter" toggleGroup="$modGroup" userData="src/swing/demon/shooter/properties" />
-                                     <RadioButton layoutX="31.0" layoutY="220.0" mnemonicParsing="false" text="kpAlive" toggleGroup="$modGroup" userData="src/swing/demon/kpAlv/properties" />
-                                     <RadioButton layoutX="31.0" layoutY="275.0" mnemonicParsing="false" text="cmrCtrl" toggleGroup="$modGroup" userData="src/swing/demon/cmrctl/properties" />
-                                    <Button fx:id="snd_start" layoutX="161.0" layoutY="54.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
-                                    <Button fx:id="snd_stop" layoutX="235.0" layoutY="54.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
-                                    <Button fx:id="rcv_start" layoutX="161.0" layoutY="112.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
-                                    <Button fx:id="rcv_stop" layoutX="235.0" layoutY="112.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
-                                    <Button fx:id="sht_start" layoutX="161.0" layoutY="167.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
-                                    <Button fx:id="sht_stop" layoutX="236.0" layoutY="167.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
-                                    <Button fx:id="kpa_start" layoutX="162.0" layoutY="222.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
-                                    <Button fx:id="kpa_stop" layoutX="236.0" layoutY="222.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
-                                    <Button fx:id="cctl_start" layoutX="161.0" layoutY="277.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
-                                    <Button fx:id="cctl_stop" layoutX="236.0" layoutY="277.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
-                                     <Label fx:id="console" layoutX="39.0" layoutY="22.0" prefHeight="26.0" prefWidth="244.0" text=" " />
+                                     <RadioButton layoutX="39.0" layoutY="158.0" mnemonicParsing="false" text="receiver" toggleGroup="$modGroup" userData="properties/receiver/" />
+                                     <RadioButton layoutX="39.0" layoutY="213.0" mnemonicParsing="false" text="shooter" toggleGroup="$modGroup" userData="properties/shooter/" />
+                                     <RadioButton layoutX="39.0" layoutY="269.0" mnemonicParsing="false" text="kpAlive" toggleGroup="$modGroup" userData="properties/kpAlv/" />
+                                     <RadioButton layoutX="39.0" layoutY="324.0" mnemonicParsing="false" text="cmrCtrl" toggleGroup="$modGroup" userData="properties/cmrctl/" />
+                                    <Button fx:id="snd_start" layoutX="134.0" layoutY="95.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
+                                    <Button fx:id="snd_stop" layoutX="199.0" layoutY="95.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
+                                    <Button fx:id="rcv_start" layoutX="134.0" layoutY="155.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
+                                    <Button fx:id="rcv_stop" layoutX="199.0" layoutY="155.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
+                                    <Button fx:id="sht_start" layoutX="134.0" layoutY="210.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
+                                    <Button fx:id="sht_stop" layoutX="200.0" layoutY="210.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
+                                    <Button fx:id="kpa_start" layoutX="135.0" layoutY="266.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
+                                    <Button fx:id="kpa_stop" layoutX="200.0" layoutY="266.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
+                                    <Button fx:id="cctl_start" layoutX="134.0" layoutY="321.0" mnemonicParsing="false" onAction="#onDemon" text="start" />
+                                    <Button fx:id="cctl_stop" layoutX="200.0" layoutY="321.0" mnemonicParsing="false" onAction="#onDemon" text="stop" />
+                                     <Label fx:id="console" layoutX="41.0" layoutY="42.0" prefHeight="26.0" prefWidth="262.0" text=" " />
+                                    <Button fx:id="sender" layoutX="262.0" layoutY="95.0" mnemonicParsing="false" onAction="#showLog" prefHeight="22.0" prefWidth="40.0" text="log" />
+                                    <Button fx:id="receiver" layoutX="262.0" layoutY="155.0" mnemonicParsing="false" onAction="#showLog" prefHeight="22.0" prefWidth="40.0" text="log" />
+                                    <Button fx:id="shooter" layoutX="262.0" layoutY="210.0" mnemonicParsing="false" onAction="#showLog" prefHeight="22.0" prefWidth="40.0" text="log" />
+                                    <Button fx:id="kpAlive" layoutX="262.0" layoutY="266.0" mnemonicParsing="false" onAction="#showLog" prefHeight="22.0" prefWidth="40.0" text="log" />
+                                    <Button fx:id="cmrCtrl" layoutX="262.0" layoutY="321.0" mnemonicParsing="false" onAction="#showLog" prefHeight="22.0" prefWidth="40.0" text="log" />
                                  </children>
                             </AnchorPane>
                             <AnchorPane minHeight="358.0" minWidth="340.0" prefHeight="358.0" prefWidth="340.0">
                                  <children>
                                     <VBox alignment="CENTER" fillWidth="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                        <children>
-                                            <ListView fx:id="listBoxMain" onMouseClicked="#listViewClick" prefHeight="283.0" prefWidth="362.0" />
-                                            <TextField fx:id="txtAddItem" prefHeight="22.0" prefWidth="206.0">
+                                            <ListView fx:id="listBoxMain" onMouseClicked="#listViewClick" prefHeight="320.0" prefWidth="381.0" />
+                                            <TextField fx:id="txtAddItem" prefHeight="22.0" prefWidth="274.0">
                                              <VBox.margin>
                                                 <Insets bottom="10.0" top="10.0" />
                                              </VBox.margin></TextField>
-                                          <HBox alignment="CENTER" fillHeight="false" prefHeight="28.0" prefWidth="165.0" VBox.vgrow="SOMETIMES">
+                                          <HBox alignment="CENTER" fillHeight="false" prefHeight="84.0" prefWidth="165.0" VBox.vgrow="SOMETIMES">
                                              <children>
                                                   <Button fx:id="btnAdd" contentDisplay="CENTER" mnemonicParsing="false" onAction="#addAction" prefHeight="22.0" prefWidth="55.0" text="추가" textAlignment="CENTER">
                                                        <HBox.margin>
@@ -67,28 +71,12 @@
                             </AnchorPane>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="358.0" prefWidth="321.0">
                                  <children>
-                                    <VBox alignment="CENTER" fillWidth="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                       <children>
-                                          <TextArea fx:id="txtProp" prefHeight="317.0" prefWidth="339.0">
-                                             <VBox.margin>
-                                                <Insets bottom="10.0" />
-                                             </VBox.margin></TextArea>
-                                          <Button fx:id="btnSave" mnemonicParsing="false" onAction="#saveAction" text="저장">
-                                             <VBox.margin>
-                                                <Insets bottom="5.0" />
-                                             </VBox.margin></Button>
-                                       </children>
-                                    </VBox>
+                                    <TextArea fx:id="txtProp" layoutX="5.0" layoutY="-2.0" prefHeight="367.0" prefWidth="464.0" />
+                                    <Button fx:id="btnSave" layoutX="203.0" layoutY="383.0" mnemonicParsing="false" onAction="#saveAction" prefHeight="22.0" prefWidth="63.0" text="저장" />
                                  </children>
                             </AnchorPane>
                           </items>
                         </SplitPane>
-                     </children>
-                  </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                     <children>
-                        <TextArea fx:id="logText" layoutY="-3.0" prefHeight="357.0" prefWidth="1035.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-2.0" AnchorPane.topAnchor="0.0" />
-<!--                         <TextFlow fx:id="console_box" layoutY="-3.0" prefHeight="357.0" prefWidth="1035.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-2.0" AnchorPane.topAnchor="0.0" />-->
                      </children>
                   </AnchorPane>
               </items>

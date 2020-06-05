@@ -6,7 +6,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,13 +19,34 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+import javafx.stage.Stage;
 import swing.demon.cmrctl.CmrctlMain;
+import swing.demon.kpAlv.kpAlvMain;
 import swing.demon.receiver.RcvMain;
 import swing.demon.sender.SndMain;
+import swing.demon.shooter.ShooterMain;
+import swing.demon.util.ExceptionConvert;
+import swing.demon.util.FileLog;
+import swing.demon.util.LogShow;
 
+import java.awt.*;
 import java.io.*;
+import java.net.JarURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.CodeSource;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
 public class MainController implements Initializable {
@@ -35,33 +59,28 @@ public class MainController implements Initializable {
 
     @FXML private TextArea txtProp;
 
-    @FXML private Button snd_start;
-    @FXML private Button snd_stop;
-    @FXML private Button rcv_start;
-    @FXML private Button rcv_stop;
-    @FXML private Button sht_start;
-    @FXML private Button sht_stop;
-    @FXML private Button kpa_start;
-    @FXML private Button kpa_stop;
-    @FXML private Button cctl_start;
-    @FXML private Button cctl_stop;
-
-    @FXML private TextFlow console_box;
-
     @FXML private Label console;
 
-    @FXML private TextArea logText;
     private ObservableList<String> listItems;
 
     RadioButton rdBtn;
-    Pattern pattern = Pattern.compile("[ !@#$%^&*(),?\":{}|<>]");
-
-
+    static final Pattern specialPattern = Pattern.compile("[ !@#$%^&*(),?\":{}|<>]");
+    static final Pattern hanglePattern = Pattern.compile("^[ㄱ-ㅎ|ㅏ-ㅣ|가-힣\\s]*$");
     StringBuilder sb;
     String propPath;
 
+
+    String logPath;
+    static File absolutePath;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        try {
+            absolutePath = new File(Class.forName("swing.main.MainController").getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException | ClassNotFoundException e) {
+            LogShow.logMessage(true, ExceptionConvert.TraceAllError(e));
+        }
+
+
         //listView 초기 부분
         listItems = FXCollections.observableArrayList();
         listBoxMain.setItems(listItems);
@@ -74,18 +93,29 @@ public class MainController implements Initializable {
                     rdBtn = (RadioButton) modGroup.getSelectedToggle();
 
                     sb = new StringBuilder();
-                    sb.append("./").append(rdBtn.getUserData().toString()).append(File.separator);
-                    propPath = sb.toString();
-                    File path = new File(sb.toString());
+                    File path = null;
+
+                    if(absolutePath.getPath().endsWith(".jar")){
+                        sb.append(absolutePath.getParent());
+                    } else {
+//                        sb.append("./total/src");
+                        sb.append("./");
+                    }
+
+                    sb.append(File.separator).append(rdBtn.getUserData().toString());
+                    path = new File(sb.toString());
+                    propPath = sb.append(File.separator).toString();
                     File[] fileList = path.listFiles();
 
-                    int len = fileList.length;
+                    int len = fileList != null ? fileList.length : 0;
                     if(len > 0) {
                         for (int i = 0; i < len; i++) {
                             listItems.add(fileList[i].getName());
                         }
                     }
-                    txtProp.clear();
+                   // }
+
+                    //txtProp.clear();
 
                 }
 
@@ -99,8 +129,12 @@ public class MainController implements Initializable {
         String getTxt = txtAddItem.getText();
         Alert alert = new Alert(Alert.AlertType.WARNING);
         BufferedWriter fw;
-        if("".equals(getTxt) || pattern.matcher(getTxt).find()) {
+//        if("".equals(getTxt) || pattern.matcher(getTxt).find()) {
+        if("".equals(getTxt) || specialPattern.matcher(getTxt).find()) {
             alert.setContentText("공백 또는 특수문자 입력하지 마세요");
+            alert.showAndWait();
+        } else if (hanglePattern.matcher(getTxt).find()) {
+            alert.setContentText("한글 입력하지 마세요.");
             alert.showAndWait();
         } else {
             listItems.add(txtAddItem.getText());
@@ -116,7 +150,7 @@ public class MainController implements Initializable {
                 fw.close();
                 txtAddItem.clear();
             } catch (IOException e) {
-                e.printStackTrace();
+                LogShow.logMessage(true, ExceptionConvert.TraceAllError(e));
             }
 
         }
@@ -152,23 +186,20 @@ public class MainController implements Initializable {
 
     @FXML
     private void saveAction(ActionEvent action) {
-        //System.out.println("저장 ㅋ");
         try{
             if(propPath != null && listBoxMain.getSelectionModel().getSelectedItem() != null) {
-                FileWriter writer = null;
-                writer = new FileWriter(propPath + File.separator + listBoxMain.getSelectionModel().getSelectedItem().toString());
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(propPath + File.separator + listBoxMain.getSelectionModel().getSelectedItem().toString()), StandardCharsets.UTF_8));
                 writer.write(txtProp.getText().replaceAll("\n", "\r\n"));
                 writer.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LogShow.logMessage(true, ExceptionConvert.TraceAllError(e));
         }
 
     }
 
     @FXML
     public void listViewClick(MouseEvent arg0) {
-        //System.out.println("clicked on " + listBoxMain.getSelectionModel().getSelectedItem());
         if(propPath != null && listBoxMain.getSelectionModel().getSelectedItem() != null) {
             BufferedReader reader = null;
             //3번째 textarea에다가 txt내용 표시
@@ -181,22 +212,7 @@ public class MainController implements Initializable {
     }
 
     public void onDemon(ActionEvent event) {
-        String log = "start!!!";
-        String time_log = "\n>>> [Sample time log] passed >>>" + log;
-        Text system_text = new Text();
-        system_text.setStyle("-fx-fill: #4F8A10;-fx-font-weight:bold;");
-        //setStyle("-fx-fill: RED;-fx-font-weight:normal;");
-        system_text.setText(time_log);
-        console_box.getChildren().add(system_text);
-
-//        cc.test("teset");
-        /*Text t1 = new Text();
-        Text text1=new Text("Some Text");
-        text1.setStyle("-fx-font-weight: bold");
-        console_log.getChildren().add(cc);*/
-
-        //System.out.println(((Control)event.getSource()).getId());
-        /*String getId = ((Control)event.getSource()).getId();
+        String getId = ((Control)event.getSource()).getId();
         String[] options = getId.split("_");
 
         String item = listBoxMain.getSelectionModel().getSelectedItem();
@@ -208,14 +224,14 @@ public class MainController implements Initializable {
                 console.setText(option_text);
             } catch (Exception e) {
                 console.setText("옵션 설정이 잘못 되었습니다.");
-                e.printStackTrace();
+                LogShow.logMessage(true, ExceptionConvert.TraceAllError(e));
             }
         }else{
             console.setText("옵션을 선택해 주세요.");
-        }*/
+        }
     }
 
-    public String controlGetid (String getid, String mode, String filePath){
+    public String controlGetid (String getid, String mode, String filePath) {
         String option_String="";
         String opt1 = "";
         String opt2 = "";
@@ -241,17 +257,23 @@ public class MainController implements Initializable {
             }
         }else if(getid.equals("sht")){
             opt1 = "Shooter";
+            ShooterMain demon = new ShooterMain();
             if (mode.equals("start")){
                 opt2 = "시작";
+                demon.shooterStart(filePath);
             }else{
                 opt2 = "정지";
+                demon.shooterStop();
             }
         }else if(getid.equals("kpa")){
             opt1 = "KeepAlive";
+            kpAlvMain demon = new kpAlvMain();
             if (mode.equals("start")){
                 opt2 = "시작";
+                demon.kpStart(filePath);
             }else{
                 opt2 = "정지";
+                demon.kpStop();
             }
         }else if(getid.equals("cctl")){
             opt1 = "CameraController";
@@ -270,39 +292,66 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    public void logTest(ActionEvent action) throws FileNotFoundException {
-        System.out.println("클릭");
-        File file = new File("c:/receivert/log.txt");
-        PrintStream printStream = new PrintStream(new FileOutputStream(file, true));
-        // standard out과 err을 file로 변경
-        System.setOut(printStream);
-        // file로 출력
-        System.out.println("테스트99999");
-        System.out.println("테스트9999988");
-        System.out.println("테스트99999777777777");
+    public void showLog(ActionEvent event) throws IOException, ClassNotFoundException {
+        //System.out.println("클릭");
+        String getId = ((Control)event.getSource()).getId();
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        FileLog fileLog = new FileLog();
+        if(logPath != null && !"".equals(logPath)) {
 
-        BufferedReader reader = null;
-        //3번째 textarea에다가 txt내용 표시
-        logText.clear();
+            File logFile = fileLog.getFile(logPath, getId);
 
-        textAreaLineInsert(file, logText);
+            if(logFile.exists()){
+
+                FXMLLoader loader = new FXMLLoader(Class.forName("swing.main.MainController").getResource("LogView.fxml"));
+                LogViewController controller = new LogViewController();
+                Stage stage = new Stage();
+                controller.setType(getId);
+                loader.setController(controller);
+                controller.setNowStage(stage);
+                controller.setLogPath(logPath);
+                controller.setFile(logFile);
+                Parent root =loader.load();
+
+                Scene scene = new Scene(root);
+                stage.setTitle(getId);
+                stage.setScene(scene);
+                stage.show();
+
+            } else {
+                alert.setContentText(logFile.getAbsolutePath() + " 경로 확인 해주세요.");
+                alert.showAndWait();
+            }
+
+
+        } else {
+            alert.setContentText("2번쩨 리스트뷰의 properties를 선택해 주세요.");
+            alert.showAndWait();
+        }
+
     }
 
-    private void textAreaLineInsert(File file, TextArea logText) {
+    private void textAreaLineInsert(File file, TextArea textArea) {
         BufferedReader reader;
         try {
-            reader = new BufferedReader(new FileReader(file));
+            //reader = new BufferedReader(new FileReader(file));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF8"));
 
             String line = "";
             while((line = reader.readLine()) != null){
-                logText.appendText(line+"\r\n");
+                textArea.appendText(line+"\r\n");
+                if((line.indexOf("log.file.path") > -1)) {
+                    logPath = line.split("=")[1];
+                }
             }
             reader.close();
 
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LogShow.logMessage(true, ExceptionConvert.TraceAllError(e));
         } catch (IOException e) {
-            e.printStackTrace();
+            LogShow.logMessage(true, ExceptionConvert.TraceAllError(e));
         }
     }
+
+
 }
