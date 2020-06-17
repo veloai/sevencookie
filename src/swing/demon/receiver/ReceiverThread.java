@@ -1,7 +1,8 @@
 package swing.demon.receiver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.util.ExceptionConvert;
-import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 
 import java.io.IOException;
@@ -14,6 +15,8 @@ public class ReceiverThread extends Thread {
     Props props;
     Socket client = null;
     static Thread t;
+    private static Logger logger = LoggerFactory.getLogger(ReceiverThread.class);
+
     ReceiverThread(ServerSocket server, Props props, boolean isLogShow) {
         this.socket = server;
         this.props = props;
@@ -31,15 +34,15 @@ public class ReceiverThread extends Thread {
                 t.start();
             }
         } catch (IOException io) {
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(io));
+            logger.info(ExceptionConvert.TraceAllError(io));
         } catch (Exception e) {
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+            logger.info(ExceptionConvert.TraceAllError(e));
         } finally {
             try {
                 t.interrupt();
                 client.close();
             } catch (IOException e) {
-                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                logger.info(ExceptionConvert.TraceAllError(e));
             }
         }
 

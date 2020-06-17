@@ -8,11 +8,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
-import java.util.concurrent.*;
 
 
 public class LogViewController implements Initializable {
@@ -24,8 +26,10 @@ public class LogViewController implements Initializable {
     String logPath;
     File file;
 
-    private ScheduledExecutorService eService = Executors.newSingleThreadScheduledExecutor();
+    //private ScheduledExecutorService eService = Executors.newSingleThreadScheduledExecutor();
+    //private ScheduledExecutorService eService = Executors.newScheduledThreadPool(1);
     StringBuffer sf = new StringBuffer();
+    private static Logger logger = LoggerFactory.getLogger(LogViewController.class);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -33,8 +37,9 @@ public class LogViewController implements Initializable {
         nowStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
-                System.out.println("log Thread 종료");
-                eService.shutdown();
+                logger.info("log Thread 종료");
+                //eService.shutdown();
+
             }
         });
 
@@ -46,13 +51,13 @@ public class LogViewController implements Initializable {
         });
 
         //log 시작
-        Runnable task = () -> {
+        /*Runnable task = () -> {
             fileRead(file);
             logArea.setText(sf.toString());
             logArea.appendText("");
             logArea.setScrollTop(Double.MAX_VALUE);
         };
-        eService.scheduleWithFixedDelay(task, 1000, 3000, TimeUnit.MILLISECONDS);
+        eService.scheduleWithFixedDelay(task, 1000, 3000, TimeUnit.MILLISECONDS);*/
 
     }
 
@@ -72,12 +77,16 @@ public class LogViewController implements Initializable {
         this.file = file;
     }
 
-    private StringBuffer fileRead(File file) {
+    public TextArea getLogTextArea() {
+        return logArea;
+    }
+
+    /*private StringBuffer fileRead(File file) {
         sf.setLength(0);
         String line;
         try {
             //BufferedReader br = new BufferedReader(new FileReader(file));
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF8"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
             while ((line = br.readLine()) != null) {
                 sf.append(line).append("\n");
             }
@@ -87,7 +96,7 @@ public class LogViewController implements Initializable {
         }
 
         return sf;
-    }
+    }*/
 
     /*private void fileRead2(File file){
         //final File file = //some file

@@ -2,21 +2,23 @@ package swing.demon.shooter;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.util.ExceptionConvert;
-import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class Shooter {
 
     private static JSONParser parser = new JSONParser();
     final static SimpleDateFormat dFrmt = new SimpleDateFormat("yyyyMMddHHmmssSSS");
     static boolean isLogShow = false;
+    private static Logger logger = LoggerFactory.getLogger(Shooter.class);
+
     public static void processShooter(String fileName, Props props, Boolean isShow) {
 
         String				serverUrl		= (String) props.get("serverUrl");
@@ -29,7 +31,7 @@ public class Shooter {
             try {
                 new File(fileName).delete();
             } catch (SecurityException e) {
-                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                logger.info(ExceptionConvert.TraceAllError(e));
             }
         }
     }
@@ -49,20 +51,19 @@ public class Shooter {
             }
 
         } catch (IOException io) {
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(io));
+            logger.info(ExceptionConvert.TraceAllError(io));
         } catch (Exception e) {
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+            logger.info(ExceptionConvert.TraceAllError(e));
         } finally {
-            if (br != null) try{br.close();}catch (IOException io){}
+            if (br != null) try{br.close();}catch (IOException io){logger.info(ExceptionConvert.TraceAllError(io));}
         }
 
         return jsonObject;
     }
 
     public static void doKeepAlive(String serverUrl, String prgmUrl, String dvcJson) throws IOException {
-        LogShow.logMessage(isLogShow, "###### Send KeepAlive Start ######");
-        //System.out.println("- " + dFrmt.format(new Date()));
-        LogShow.logMessage(isLogShow, dvcJson);
+        logger.info("###### Send KeepAlive Start ######");
+        logger.info(dvcJson);
 
         URL url 			= new URL(serverUrl + prgmUrl);
         HttpURLConnection conn 			= (HttpURLConnection) url.openConnection();
@@ -82,12 +83,12 @@ public class Shooter {
         String line = null;
 
         while ((line = br.readLine()) != null) {
-            LogShow.logMessage(isLogShow, line);
+            logger.info(line);
         }
 
         osw.close();
         br.close();
-        LogShow.logMessage(isLogShow, "###### Send KeepAlive End ######");
+        logger.info("###### Send KeepAlive End ######");
     }
 
 }

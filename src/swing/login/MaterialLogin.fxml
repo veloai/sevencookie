@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import com.jfoenix.controls.JFXButton?>
-<?import com.jfoenix.controls.JFXCheckBox?>
-<?import com.jfoenix.controls.JFXPasswordField?>
-<?import com.jfoenix.controls.JFXTextField?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="550.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="swing.login.MaterialLoginController">
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="550.0" prefWidth="800.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="swing.login.MaterialLoginController">
    <children>
       <StackPane layoutX="184.0" layoutY="100.0" prefHeight="550.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -24,34 +17,33 @@
             </VBox>
             <AnchorPane prefHeight="486.0" prefWidth="800.0" style="-fx-background-color: transparent;">
                <children>
-                  <AnchorPane layoutX="166.0" layoutY="113.0" prefHeight="342.0" prefWidth="469.0" style="-fx-background-color: WHITE; -fx-effect: dropshadow(gaussian, rgb(0.0, 0.0, 0.0, 0.15), 6.0, 0.7, 0.0,1.5); -fx-background-radius: 4; -fx-border-radius: 4; -fx-padding: 8;">
+                  <AnchorPane layoutX="166.0" layoutY="113.0" prefHeight="342.0" prefWidth="469.0" style="-fx-background-color: WHITE; -fx-effect: dropshadow(gaussian, rgba(0.0, 0.0, 0.0, 0.15), 6.0, 0.7, 0.0,1.5); -fx-background-radius: 4; -fx-border-radius: 4; -fx-padding: 8;">
                      <children>
-                        <ImageView fitHeight="80.0" fitWidth="80.0" layoutX="185.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="80.0" fitWidth="80.0" layoutX="185.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../images/User.png" />
                            </image>
                         </ImageView>
-                        <JFXTextField fx:id="userId" labelFloat="true" layoutX="75.0" layoutY="147.0" maxWidth="316.0" minWidth="233.0" prefHeight="31.0" prefWidth="316.0" promptText="Enter Username">
+                        <TextField fx:id="userId" layoutX="75.0" layoutY="140.0" maxWidth="316.0" minWidth="233.0" prefHeight="31.0" prefWidth="316.0" promptText="Enter Username">
                            <font>
                               <Font name="Roboto Medium" size="14.0" />
                            </font>
-                        </JFXTextField>
-                        <JFXPasswordField fx:id="userPw" labelFloat="true" layoutX="75.0" layoutY="195.0" maxWidth="316.0" minWidth="235.0" prefHeight="31.0" prefWidth="316.0" promptText="Enter password">
+                        </TextField>
+                        <PasswordField fx:id="userPw" layoutX="75.0" layoutY="190.0" maxWidth="316.0" minWidth="235.0" prefHeight="31.0" prefWidth="316.0" promptText="Enter password">
                            <font>
                               <Font name="Roboto Medium" size="14.0" />
                            </font>
-                        </JFXPasswordField>
-                        <JFXCheckBox checkedColor="#ff1744" layoutX="75.0" layoutY="244.0" prefHeight="31.0" prefWidth="171.0" text="Keep me logged in">
+                        </PasswordField>
+                        <CheckBox layoutX="75.0" layoutY="241.0" prefHeight="31.0" prefWidth="171.0" text="Keep me logged in">
                            <font>
                               <Font name="Roboto Regular" size="14.0" />
                            </font>
-                        </JFXCheckBox>
-                        <JFXButton fx:id="loginBtn" onAction="#ButtonAction" layoutX="185.0" layoutY="286.0" prefHeight="32.0" prefWidth="100.0" style="-fx-background-color: #2196f3;" text="Login" textFill="WHITE">
+                        </CheckBox>
+                        <Button fx:id="loginBtn" layoutX="185.0" layoutY="283.0" onAction="#ButtonAction" prefHeight="32.0" prefWidth="100.0" style="-fx-background-color: #2196f3;" text="Login" textFill="WHITE">
                            <font>
                               <Font name="Roboto Bold" size="14.0" />
                            </font>
-                        </JFXButton>
-                        <JFXButton layoutX="348.0" layoutY="290.0" />
+                        </Button>
                      </children>
                   </AnchorPane>
                   <VBox layoutX="188.0" layoutY="24.0">

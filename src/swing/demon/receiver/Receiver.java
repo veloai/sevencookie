@@ -1,8 +1,9 @@
 package swing.demon.receiver;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.util.ExceptionConvert;
-import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 
 import java.io.*;
@@ -13,6 +14,7 @@ public class Receiver implements Runnable {
     Socket socket;
     Props props;
     boolean isLogShow = false;
+    private static Logger logger = LoggerFactory.getLogger(Receiver.class);
 
     public Receiver(Socket socket, Props props, boolean isLogShow) {
         this.socket = socket;
@@ -30,24 +32,24 @@ public class Receiver implements Runnable {
             String keyVal = props.getString(key);
 
 //            System.out.println("- CLIENT : " + socket.getInetAddress());
-            LogShow.logMessage(isLogShow, "- KEY : " + key + " - KEY-VALUE : " + keyVal);
+            logger.info("- KEY : {} - KEY-VALUE : {}", key, keyVal);
 
             if (keyVal == null) {
-                LogShow.logMessage(isLogShow, "Raised error!!! You should make directory![" + key + "] key");
+                logger.info("Raised error!!! You should make directory![ {} ] key", key);
             } else {
                 sendReady(os);
                 receiveFile(key, keyVal, is, os);
             }
 
         } catch (IOException e) {
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+            logger.info(ExceptionConvert.TraceAllError(e));
         } catch (Exception e) {
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+            logger.info(ExceptionConvert.TraceAllError(e));
         } finally {
             try {
                 socket.close();
             } catch (IOException e) {
-                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                logger.info(ExceptionConvert.TraceAllError(e));
             }
         }
     }
@@ -72,7 +74,6 @@ public class Receiver implements Runnable {
                 fname = temp.split("\\|")[0];
                 fsize = Long.parseLong(temp.split("\\|")[1]);
 
-                //LogShow.logMessage(isLogShow, String.format("- File Name : %s  - File Size : %d bytes", fname, fsize));
                 sendReady(os);
 
                 File dir = new File(path);
@@ -100,13 +101,14 @@ public class Receiver implements Runnable {
                     }
                 }
                 bos.flush();
-                LogShow.logMessage(isLogShow, "-[" + RcvMain.getNow() + "] File Received : " + path + File.separator + fname + " successfully!");
+                //logger.info("-[" + RcvMain.getNow() + "] File Received : " + path + File.separator + fname + " successfully!");
+                logger.info("-[ {} ] File Received : {}{}{} successfully!",  RcvMain.getNow(), path, File.separator, fname);
 
                 sendReady(os);
                 bos.close();
 
                 long end = System.currentTimeMillis();
-                System.out.println(end-start + " ms");
+                logger.info(end-start + " ms");
             } else {
 //                    System.out.println("received file successfully!");
                 break;

@@ -5,6 +5,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -13,7 +15,7 @@ import java.awt.event.MouseEvent;
 public class TrayMenu extends Frame {
     private final Stage primaryStage;
     private final transient TrayIcon trayIcon;
-
+    private static Logger logger = LoggerFactory.getLogger(TrayMenu.class);
     public TrayMenu(Stage stage, TrayIcon trayIcon) {
         primaryStage = stage;
         this.trayIcon = trayIcon;
@@ -53,10 +55,10 @@ public class TrayMenu extends Frame {
             trayIcon.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2) {
-                        //System.out.println("double click");
-                        handleShow();
-                    }
+                if (e.getClickCount() == 2) {
+                    //System.out.println("double click");
+                    handleShow();
+                }
                 }
             });
 
@@ -66,6 +68,7 @@ public class TrayMenu extends Frame {
             popup.add(openItem);
             popup.addSeparator();
             popup.add(exitItem);
+            trayIcon.setImageAutoSize(true);
             trayIcon.setPopupMenu(popup);
             trayIcon.setToolTip(systemName);
             systemTray.add(trayIcon);
@@ -88,9 +91,12 @@ public class TrayMenu extends Frame {
 
     private void handleTerminate() {
         Platform.runLater(() -> {
+            Platform.setImplicitExit(true);
             primaryStage.fireEvent(new WindowEvent(primaryStage, WindowEvent.WINDOW_CLOSE_REQUEST));
-            SystemTray.getSystemTray().remove(trayIcon);
+            primaryStage.close();
             Platform.exit();
+            SystemTray.getSystemTray().remove(trayIcon);
+            logger.info("프로그램 종료");
             System.exit(0);
         });
     }

@@ -11,5 +11,6 @@ public class Const {
 	public static final String START = "시작";
 	public static final String STOP = "정지";
 	
-	
+	public static final int TEXTAREA = 1;
+	public static final int TEXTFIELD = 2;
 }

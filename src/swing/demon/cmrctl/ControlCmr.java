@@ -1,11 +1,12 @@
 package swing.demon.cmrctl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.cmrctl.exception.DataValidationException;
 import swing.demon.cmrctl.vo.CtrlInfoVO;
 import swing.demon.cmrctl.vo.CtrlInputVO;
 import swing.demon.cmrctl.vo.DvcOp;
 import swing.demon.util.ExceptionConvert;
-import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 
 import java.io.*;
@@ -22,6 +23,8 @@ public class ControlCmr {
     static String[] dvcIps = null;		//제어기 아이피
     static String[] dvcIds = null;		//제어기 아이디
     static boolean isLogShow = false;
+    private static Logger logger = LoggerFactory.getLogger(ControlCmr.class);
+
     public static void processCtrl(String fileName, Props props, boolean isShow){
 
         dvcIps = props.getString("dvc.ip").trim().split(",");
@@ -48,7 +51,7 @@ public class ControlCmr {
                 }
             }
             if(!isDvcIdExist) {
-                LogShow.logMessage(isLogShow, "------ "+ vo.getDvcId() +"설정했던 제어기 ID가 아닙니다. 다시 확인해주세요.------ ");
+                logger.info("------ {} 설정했던 제어기 ID가 아닙니다. 다시 확인해주세요.------  ", vo.getDvcId());
                 continue;
             }
             //- TODO 디폴트 소프트웨어리셋
@@ -68,9 +71,9 @@ public class ControlCmr {
             //System.out.println(thisResult);
 
             if (resultStatus.equalsIgnoreCase("S")) {
-                LogShow.logMessage(isLogShow, "------ "+ vo.result() + " controlled successfully.");
+                logger.info("------ {} controlled successfully.", vo.result());
             } else {
-                LogShow.logMessage(isLogShow, "------ "+ vo.result() + " controlled failed.");
+                logger.info("------ {} controlled failed.", vo.result());
             }
         }
 
@@ -86,14 +89,14 @@ public class ControlCmr {
                 try {
                     listCtrlInfoVO.add(parse(line));
                 } catch (DataValidationException dve) {
-                    LogShow.logMessage(isLogShow, "------ "+ ExceptionConvert.getMessage(dve));
+                    logger.info(ExceptionConvert.TraceAllError(dve));
                 }
 
             }
         } catch (FileNotFoundException e) {
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+            logger.info(ExceptionConvert.TraceAllError(e));
         } catch (IOException e) {
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+            logger.info(ExceptionConvert.TraceAllError(e));
         }
 
         return listCtrlInfoVO;
@@ -140,16 +143,16 @@ public class ControlCmr {
             }
         } catch (IllegalArgumentException e) {
             ret = "E";// 호스트 입력 잘못
-            LogShow.logMessage(isLogShow, vo.getCmrId() + " : "+ ExceptionConvert.getMessage(e));
+            logger.info("{} : {}", vo.getCmrId(), ExceptionConvert.TraceAllError(e));
         } catch (SocketTimeoutException e) {
             ret = "T"; // Time Out
-            LogShow.logMessage(isLogShow, vo.getCmrId() + " : "+ ExceptionConvert.getMessage(e));
+            logger.info("{} : {}", vo.getCmrId(), ExceptionConvert.TraceAllError(e));
         } catch (IOException e){
             ret = "E";
-            LogShow.logMessage(isLogShow, vo.getCmrId() + " : "+ ExceptionConvert.getMessage(e));
+            logger.info("{} : {}", vo.getCmrId(), ExceptionConvert.TraceAllError(e));
         } catch (Exception e) {
             ret = "E";
-            LogShow.logMessage(isLogShow, vo.getCmrId() + " : "+ ExceptionConvert.getMessage(e));
+            logger.info("{} : {}", vo.getCmrId(), ExceptionConvert.TraceAllError(e));
         }
 
         return ret;
