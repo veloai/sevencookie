@@ -1,9 +1,8 @@
 package swing.demon.shooter;
 
-import swing.demon.cmrctl.ControlCmr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.util.ExceptionConvert;
-import swing.demon.util.FileLog;
-import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 
 import java.io.File;
@@ -20,17 +19,13 @@ public class ShooterMain {
 
     static Thread thread = null;
     boolean isLogShow = false;
+    private static Logger logger = LoggerFactory.getLogger(ShooterMain.class);
 
     public void shooterStart (String propPath) {
         //prop 호출
         props = new Props(propPath);
 
         isLogShow = props.getBoolean("is.log.show");
-        if(isLogShow) {
-            String logPath = props.getString("log.file.path");
-            FileLog fileLog = new FileLog();
-            fileLog.setFileLog(logPath, "shooter");
-        }
 
         if(thread == null) {
 
@@ -48,11 +43,11 @@ public class ShooterMain {
                         try {
                             watchKey = watchService.take();//이벤트가 오길 대기(Blocking)
                         } catch (InterruptedException e) {
-                            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                            logger.info(ExceptionConvert.TraceAllError(e));
                             try {
                                 watchService.close();
                             } catch (IOException de) {
-                                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(de));
+                                logger.info(ExceptionConvert.TraceAllError(de));
                             }
                         }
                         List<WatchEvent<?>> events = watchKey.pollEvents();//이벤트들을 가져옴
@@ -74,7 +69,7 @@ public class ShooterMain {
                             try {
                                 watchService.close();
                             } catch (IOException e) {
-                                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                                logger.info(ExceptionConvert.TraceAllError(e));
                             }
                         }
                     }
@@ -82,10 +77,10 @@ public class ShooterMain {
                 thread.setName("Thread shooter");
                 thread.start();
             } catch (IOException e) {
-                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                logger.info(ExceptionConvert.TraceAllError(e));
             }
         } else {
-            LogShow.logMessage(isLogShow, "이미 실행중 입니다.");
+            logger.info("이미 실행중 입니다.");
         }
     }
 
@@ -93,9 +88,9 @@ public class ShooterMain {
         if(thread != null) {
             thread.interrupt();
             thread = null;
-            LogShow.logMessage(isLogShow, "정상적으로 Shooter 종료");
+            logger.info("정상적으로 Shooter 종료");
         } else {
-            LogShow.logMessage(isLogShow, "실행중인 shooter thread 없습니다.");
+            logger.info("실행중인 shooter thread 없습니다.");
         }
     }
 }

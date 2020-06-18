@@ -1,9 +1,7 @@
 package swing.demon.kpAlv;
 
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,19 +12,19 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.util.ExceptionConvert;
-import swing.demon.util.FileLog;
-import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
-import swing.demon.util.props.PropsException;
 
 
-@SuppressWarnings("unchecked")
 public class kpAlvMain {
 	static Props props;
 	final static SimpleDateFormat dFrmt = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	static boolean isLogShow = false;
 	static Timer timer;
+	private static Logger logger = LoggerFactory.getLogger(kpAlvMain.class);
+
 	static void initPorpos(String path) {
 		//final String cname = args.length <= 0 || args[0] == null || args[0].isEmpty() ? null : args[0];
 		
@@ -42,7 +40,7 @@ public class kpAlvMain {
 			JSONObject obj = (JSONObject) parser.parse(new FileReader(props.getString("dvcfile.dir")));
 			ret = (JSONArray) obj.get("dvcList");
 		} catch (ParseException | IOException e) {
-			LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+			logger.info(ExceptionConvert.TraceAllError(e));
 			return null;
 		}
 		return ret;
@@ -80,10 +78,10 @@ public class kpAlvMain {
 			InetAddress ping = InetAddress.getByName(ip);
 			ret = ping.isReachable(1000);
 		} catch (UnknownHostException e) {
-			LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+			logger.info(ExceptionConvert.TraceAllError(e));
 			return false;
 		} catch (IOException e) {
-			LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+			logger.info(ExceptionConvert.TraceAllError(e));
 			return false;
 		}
 
@@ -96,11 +94,6 @@ public class kpAlvMain {
 			kpAlvMain.initPorpos(filePath);
 
 			isLogShow = props.getBoolean("is.log.show");
-			if(isLogShow) {
-				String logPath = props.getString("log.file.path");
-				FileLog fileLog = new FileLog();
-				fileLog.setFileLog(logPath, "kpAlive");
-			}
 
 			timer = new Timer();
 			TimerTask 	timerTask 	= new TimerTask() {
@@ -121,22 +114,21 @@ public class kpAlvMain {
 							JSONObject dvc = (JSONObject) dvcList.get(i);
 							bw.write(dvc.toJSONString());
 							bw.newLine();
-							LogShow.logMessage(isLogShow, dvc.toJSONString());
+							logger.info(dvc.toJSONString());
 						}
 
 					} catch (Exception e) {
-						//LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
-						e.printStackTrace();
+						logger.info(ExceptionConvert.TraceAllError(e));
 						timer.cancel();
 					} finally {
-						if (bw != null) try {bw.close();}catch (Exception e){}
+						if (bw != null) try {bw.close();}catch (Exception e){logger.info(ExceptionConvert.TraceAllError(e));}
 					}
 				}
 			};
 
 			timer.schedule(timerTask, 0, props.getInt("interval"));
 		} else {
-			LogShow.logMessage(isLogShow, "이미 실행중 입니다.");
+			logger.info("이미 실행중 입니다.");
 		}
 	}
 
@@ -144,9 +136,9 @@ public class kpAlvMain {
 		if(timer != null) {
 			timer.cancel();
 			timer = null;
-			LogShow.logMessage(isLogShow, "정상적으로 KeepAlive 종료");
+			logger.info("정상적으로 KeepAlive 종료");
 		} else {
-			LogShow.logMessage(isLogShow, "실행중인 keepAlive thread 없습니다.");
+			logger.info("실행중인 keepAlive thread 없습니다.");
 		}
 	}
 }

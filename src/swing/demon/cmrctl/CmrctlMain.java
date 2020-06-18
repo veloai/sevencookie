@@ -1,10 +1,9 @@
 package swing.demon.cmrctl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.util.ExceptionConvert;
-import swing.demon.util.FileLog;
-import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
-import swing.demon.util.props.PropsException;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,16 +24,13 @@ public class CmrctlMain {
     static Thread thread = null;
 
     boolean isLogShow = false;
+    private static Logger logger = LoggerFactory.getLogger(CmrctlMain.class);
+
     public void cmrctlStart (String propPath) {
         //prop 호출
         props = new Props(propPath);
 
         isLogShow = props.getBoolean("is.log.show");
-        if(isLogShow) {
-            String logPath = props.getString("log.file.path");
-            FileLog fileLog = new FileLog();
-            fileLog.setFileLog(logPath, "cmrCtrl");
-        }
 
         /* option */
         //실시간 파일 검지 서비스 정의 --기존 처리 내용
@@ -65,11 +61,11 @@ public class CmrctlMain {
                         try {
                             watchKey = watchService.take();//이벤트가 오길 대기(Blocking)
                         } catch (InterruptedException e) {
-                            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                            logger.info(ExceptionConvert.TraceAllError(e));
                             try {
                                 watchService.close();
                             } catch (IOException de) {
-                                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(de));
+                                logger.info(ExceptionConvert.TraceAllError(de));
                             }
                         }
                         List<WatchEvent<?>> events = watchKey.pollEvents();//이벤트들을 가져옴
@@ -91,18 +87,18 @@ public class CmrctlMain {
                             try {
                                 watchService.close();
                             } catch (IOException e) {
-                                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                                logger.info(ExceptionConvert.TraceAllError(e));
                             }
                         }
                     }
                 });
-                thread.setName("Thread CameraCtl");
+                thread.setName("Thread cmrCtl");
                 thread.start();
             } catch (IOException e) {
-                LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+                logger.info(ExceptionConvert.TraceAllError(e));
             }
         } else {
-            LogShow.logMessage(isLogShow, "이미 실행중 입니다.");
+            logger.info("이미 실행중 입니다.");
         }
 
 
@@ -111,9 +107,9 @@ public class CmrctlMain {
         if(thread != null) {
             thread.interrupt();
             thread = null;
-            LogShow.logMessage(isLogShow, "정상적으로 Cmrctrl 종료");
+            logger.info("정상적으로 cmrCtl 종료");
         } else {
-            LogShow.logMessage(isLogShow, "실행중인 Cmrctrl thread 없습니다.");
+            logger.info("실행중인 cmrCtl thread 없습니다.");
         }
     }
 }

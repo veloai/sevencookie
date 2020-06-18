@@ -1,9 +1,9 @@
 package swing.demon.sender;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.util.ExceptionConvert;
-import swing.demon.util.FileLog;
-import swing.demon.util.LogShow;
 import swing.demon.util.props.Props;
 
 import java.io.*;
@@ -17,19 +17,15 @@ public class SndMain {
     private static GenericExtFilter filter = new GenericExtFilter(".eof");
     static boolean isLogShow = false;
     static Timer timer;
+    private static Logger logger = LoggerFactory.getLogger(SndMain.class);
+
     public void sndStart (String propPath) {
-        System.out.println("SndMain.sndStart");
+        logger.info("SndMain.sndStart");
         //prop 호출
         props = new Props(propPath);
 
         isLogShow = props.getBoolean("is.log.show");
-        //isExceptionShow = props.getBoolean("is.Exception.show");
 
-        if(isLogShow) {
-            String logPath = props.getString("log.file.path");
-            FileLog fileLog = new FileLog();
-            fileLog.setFileLog(logPath, "sender");
-        }
         if(timer == null) {
 
             timer = new Timer();
@@ -45,13 +41,13 @@ public class SndMain {
 
             timer.schedule(timerTask, 5000, interval);
         } else {
-            LogShow.logMessage(isLogShow, "이미 실행중 입니다.");
+            logger.info("이미 실행중 입니다.");
         }
 
     }
 
     static void send () {
-        LogShow.logMessage(isLogShow, "##########   START Sync Sender  ##########");
+        logger.info("##########   START Sync Sender  ##########");
 
         Socket socket = null;
         OutputStream os = null;
@@ -68,7 +64,7 @@ public class SndMain {
                 boolean isDirEof = props.getString(dirs[i] + ".eof") != null && props.getString(dirs[i] + ".eof").equalsIgnoreCase("y");
                 if (isDirEof) {
                     if (!existEof(props.getString(dirs[i]))) {
-                        LogShow.logMessage(isLogShow, dirs[i] + "[" + props.getString(dirs[i]) + "] eof condition, not exist eof file!");
+                        logger.info("{} [ {} ] eof condition, not exist eof file!", dirs[i], props.getString(dirs[i]));
                         continue;
                     } else {
 //                        new File(props.getString(dirs[i])).deleteOnExit();
@@ -103,8 +99,7 @@ public class SndMain {
             if(is != null) is.close();
             if(socket != null) socket.close();
         } catch (IOException e) {
-            //e.printStackTrace();
-            LogShow.logMessage(isLogShow, ExceptionConvert.getMessage(e));
+            logger.info(ExceptionConvert.TraceAllError(e));
         }
 
     }
@@ -126,70 +121,73 @@ public class SndMain {
         files = getFileList(dir);
 
         Boolean isRemove = props.getString("dirs.remove") != null && props.getString("dirs.remove").equalsIgnoreCase("y");
-        LogShow.logMessage(isLogShow, "- Path :" + path);
+        logger.info("- Path :" + path);
 
         StringBuilder sb;
         //= chkEof 사용하지 않음 모조건 보냄
-        for (File file : files) {
-            if (file.isDirectory()) {
-                LogShow.logMessage(isLogShow, file.getAbsoluteFile() + " is directory. skipped!!!");
-                continue;
-            }
-            LogShow.logMessage(isLogShow, String.format("- Transfer file : %s  - File Size : %d", file.getName(), file.length()));
-            int rBytes = 0;
-            byte[] buffer = new byte[props.getInt("send.buffersize")];
+        if(files != null) {
 
-            String fileNm = file.getName();
-            String onlyNm = FilenameUtils.getBaseName(file.getName());
-            String ext = FilenameUtils.getExtension(file.getName());
-
-            //여기다가 위치 변환 넣어줘야함.
-            if(isChangeLocNm && !ext.toLowerCase().equals("eof")) {
-
-                //fileNm = changeLocNameAndConvert(onlyNm, ext, isConvertNm);
-                fileNm = changeLocNmAndConvert(onlyNm, ext, isConvertNm);
-
-                if(fileNm == null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    logger.info("{} is directory. skipped!!!", file.getAbsoluteFile());
                     continue;
                 }
+                logger.info("- Transfer file : {}  - File Size : {}", file.getName(), file.length());
+                int rBytes = 0;
+                byte[] buffer = new byte[props.getInt("send.buffersize")];
 
-            }
+                String fileNm = file.getName();
+                String onlyNm = FilenameUtils.getBaseName(file.getName());
+                String ext = FilenameUtils.getExtension(file.getName());
 
-            String temp = fileNm + "|" + String.valueOf(file.length());
-            byte[] finfo = temp.getBytes();
+                //여기다가 위치 변환 넣어줘야함.
+                if(isChangeLocNm && !ext.toLowerCase().equals("eof")) {
 
-            os.write(finfo, 0, finfo.length);
+                    //fileNm = changeLocNameAndConvert(onlyNm, ext, isConvertNm);
+                    fileNm = changeLocNmAndConvert(onlyNm, ext, isConvertNm);
 
-            byte[] rs = new byte[5];
-            is.read(rs, 0, rs.length);
-            String reply = new String(rs);
-            //System.out.println("- " + reply);
+                    if(fileNm == null) {
+                        continue;
+                    }
 
-            if (reply.equals("READY")) {
-                FileInputStream fis = new FileInputStream(file); //117
-
-                while ((rBytes = fis.read(buffer)) >= 0) {
-                    //System.out.println("- Send : " + rBytes + "bytes");
-                    os.write(buffer, 0, rBytes);
                 }
 
-                os.flush();
+                String temp = fileNm + "|" + String.valueOf(file.length());
+                byte[] finfo = temp.getBytes();
 
-                fis.close();
+                os.write(finfo, 0, finfo.length);
 
-                if (isRemove) {
-                    if(file.delete()){
-                        LogShow.logMessage(isLogShow, file.getAbsoluteFile() + " is deleted, after sending!");
+                byte[] rs = new byte[5];
+                is.read(rs, 0, rs.length);
+                String reply = new String(rs);
+                //System.out.println("- " + reply);
+
+                if (reply.equals("READY")) {
+                    FileInputStream fis = new FileInputStream(file); //117
+
+                    while ((rBytes = fis.read(buffer)) >= 0) {
+                        //System.out.println("- Send : " + rBytes + "bytes");
+                        os.write(buffer, 0, rBytes);
+                    }
+
+                    os.flush();
+
+                    fis.close();
+
+                    if (isRemove) {
+                        if(file.delete()){
+                            logger.info("{} is deleted, after sending!", file.getAbsoluteFile());
+                        }
                     }
                 }
-            }
 
-            is.read(rs, 0, rs.length);
-            reply = new String(rs);
-            //System.out.println("- " + reply);
+                is.read(rs, 0, rs.length);
+                reply = new String(rs);
+                //System.out.println("- " + reply);
 
-            if (!reply.equals("READY")) {
-                break;
+                if (!reply.equals("READY")) {
+                    break;
+                }
             }
         }
 
@@ -233,7 +231,7 @@ public class SndMain {
                 map.put(String.valueOf(i+1), nmSplit[i]);
             }
         } else {
-            LogShow.logMessage(isLogShow, "설정값과 파일이름 매핑 개수가 다릅니다. : " + onlyNm);
+            logger.info("설정값과 파일이름 매핑 개수가 다릅니다. : {}", onlyNm);
             return null;
         }
         if(isConvertNm) {
@@ -258,7 +256,7 @@ public class SndMain {
                     if(convertNm != null) {
                         map.put(replaceVal, convertNm);
                     } else {
-                        LogShow.logMessage(isLogShow, "문자열 치환 실패(제대로 등록해 주세요.) : " + cvStr.toString());
+                        logger.info("문자열 치환 실패(제대로 등록해 주세요.) : {}", cvStr.toString());
                         return null;
                     }
 
@@ -274,11 +272,11 @@ public class SndMain {
                             //System.out.println(completeLocChng[Integer.parseInt(t[i])-1] + "변환 성공");
                             map.put(val, convertNm);
                         } else {
-                            LogShow.logMessage(isLogShow, "문자열 치환 실패(제대로 등록해 주세요.) : " + tm);
+                            logger.info("문자열 치환 실패(제대로 등록해 주세요.) : {}", tm);
                             return null;
                         }
                     } catch (NumberFormatException e) {
-                        LogShow.logMessage(isLogShow, "convert 위치 특수문자 빼고 제대로 입력해 주세요.");
+                        logger.info("convert 위치 특수문자 빼고 제대로 입력해 주세요.");
                         return null;
                     }
                 }
@@ -305,11 +303,10 @@ public class SndMain {
         if(timer != null) {
             timer.cancel();
             timer = null;
-            LogShow.logMessage(isLogShow, "정상적으로 Sender 종료");
+            logger.info("정상적으로 Sender 종료");
         } else {
-            LogShow.logMessage(isLogShow, "실행중인 Sender 없습니다.");
+            logger.info("실행중인 Sender 없습니다.");
         }
-
     }
 
     static public String getLogPath() {

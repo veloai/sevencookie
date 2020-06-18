@@ -1,6 +1,8 @@
 
 package swing.demon.util.props;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swing.demon.util.ExceptionConvert;
 
 import java.io.BufferedReader;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class Props {
 	Map<String, Object> props = new HashMap();
     List<Object[]> propList = new ArrayList<Object[]>();
+    private static Logger logger = LoggerFactory.getLogger(Props.class);
 
     public Props(String path){
 
@@ -23,7 +26,7 @@ public class Props {
             propsFile = this.openProps(path);
             this.readProps(propsFile);
         } catch (PropsException | IOException e) {
-            System.out.println(ExceptionConvert.getMessage(e));
+            logger.info(ExceptionConvert.TraceAllError(e));
             System.exit(-1);
         }
     }
